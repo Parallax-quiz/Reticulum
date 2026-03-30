@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parallax — かんたん哲学</title>
+  <style>
+    :root {
+      --bg: #17151200;
+      --surface: #1E1B17;
+      --surface-2: #252018;
+      --border: #3A3328;
+      --border-strong: #4D4438;
+      --accent: #C4A882;
+      --accent-light: #2A2318;
+      --text: #EDE8E0;
+      --text-2: #B8AFA3;
+      --text-3: #7A7268;
+      --radius: 6px;
+      --radius-lg: 10px;
+    }
+    body {
+      background: #17151200;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .site-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      background: #171512;
+      border-bottom: 1px solid var(--border);
+    }
+    .site-logo {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+    .site-ruby {
+      font-size: 5px;
+      color: var(--text-3);
+      letter-spacing: 0.12em;
+      text-align: center;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+      background: #171512;
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.7;
+      padding-top: 48px;
+    }
+
+    .wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── TYPOGRAPHY ── */
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 0.6rem;
+    }
+
+    .title-lg {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.25;
+      margin-bottom: 0.75rem;
+    }
+
+    .title-md {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+
+    .body-text {
+      font-size: 15px;
+      color: var(--text-2);
+      line-height: 1.75;
+    }
+
+    .sub-text {
+      font-size: 13px;
+      color: var(--text-3);
+      line-height: 1.6;
+    }
+
+    /* ── LAYOUT ── */
+    .center { text-align: center; }
+
+    .stack-lg { display: flex; flex-direction: column; gap: 1.5rem; }
+    .stack-md { display: flex; flex-direction: column; gap: 1rem; }
+    .stack-sm { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    /* ── PROGRESS ── */
+    .progress-track {
+      background: var(--border);
+      border-radius: 99px;
+      height: 2px;
+      margin-bottom: 2.5rem;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+      transition: width 0.5s ease;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+    }
+
+    .card-accent {
+      background: var(--surface);
+      border: 1.5px solid var(--accent);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--surface);
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.75rem 2rem;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:disabled { opacity: 0.35; cursor: default; }
+
+    .btn-secondary {
+      display: inline-block;
+      background: transparent;
+      color: var(--text-2);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 0.65rem 1.5rem;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      width: 100%;
+      text-align: center;
+    }
+    .btn-secondary:hover { background: var(--surface-2); color: var(--text); }
+
+    .btn-ghost {
+      background: none;
+      border: none;
+      color: var(--text-3);
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .btn-ghost:hover { color: var(--text-2); }
+
+    .btn-back {
+      background: none;
+      border: none;
+      color: var(--text-3);
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 0;
+      margin-bottom: 2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.15s;
+    }
+    .btn-back:hover { color: var(--text-2); }
+
+    /* ── MODE / THEME CARDS ── */
+    .mode-card {
+      display: block;
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .mode-card:hover {
+      border-color: var(--border-strong);
+      background: var(--accent-light);
+    }
+    .mode-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+    .mode-card-desc {
+      font-size: 13px;
+      color: var(--text-3);
+      line-height: 1.5;
+    }
+
+    /* ── QUESTION ── */
+    .q-num {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 0.75rem;
+    }
+
+    .q-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.5;
+      margin-bottom: 0.75rem;
+    }
+
+    .q-premise {
+      font-size: 13px;
+      color: var(--text-2);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+      padding: 0.85rem 1rem;
+      background: var(--surface-2);
+      border-radius: var(--radius);
+      border-left: 2px solid var(--border-strong);
+    }
+
+    .q-intro {
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.75;
+      margin-bottom: 1.25rem;
+      padding: 0.85rem 1rem;
+      background: var(--accent-light);
+      border-radius: var(--radius);
+      border-left: 2px solid var(--accent);
+    }
+
+    /* ── CHOICES ── */
+    .choices { display: flex; flex-direction: column; gap: 8px; }
+
+    .choice-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.9rem 1rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      width: 100%;
+      font-family: inherit;
+    }
+    .choice-btn:hover {
+      border-color: var(--border-strong);
+      background: var(--surface);
+    }
+    .choice-btn.sel {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .choice-mark {
+      font-size: 12px;
+      min-width: 16px;
+      color: var(--accent);
+      padding-top: 2px;
+      font-weight: 600;
+    }
+    .choice-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-3);
+      min-width: 14px;
+      padding-top: 3px;
+      letter-spacing: 0.05em;
+    }
+    .choice-text {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.5;
+      flex: 1;
+    }
+    .choice-guide {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 3px;
+      font-style: italic;
+    }
+
+    /* ── HINT ── */
+    .hint-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-3);
+      cursor: pointer;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 3px 12px;
+      margin-bottom: 1.25rem;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .hint-toggle:hover { border-color: var(--border-strong); color: var(--text-2); }
+
+    .hint-box {
+      display: none;
+      font-size: 13px;
+      color: var(--text-2);
+      line-height: 1.75;
+      background: var(--surface-2);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .hint-box.open { display: block; }
+
+    /* ── NAV ROW ── */
+    .nav-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1.25rem;
+    }
+
+    /* ── INTRO REVEAL ── */
+    .reveal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+    }
+    .reveal-q {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+    .reveal-ans {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-bottom: 0.75rem;
+    }
+    .reveal-hit {
+      font-size: 13px;
+      color: var(--text-2);
+      line-height: 1.75;
+      padding: 0.75rem 0.9rem;
+      background: var(--accent-light);
+      border-radius: var(--radius);
+      border-left: 2px solid var(--accent);
+    }
+
+    /* ── RESULT ── */
+    .result-hero { text-align: center; padding: 2rem 0 1.75rem; }
+    .result-badge {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 4px 14px;
+      margin-bottom: 1rem;
+    }
+    .result-axis {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
+      margin-bottom: 0.4rem;
+    }
+    .result-phil { font-size: 13px; color: var(--text-3); }
+
+    .rsec {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+    }
+    .rsec-tag {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 0.5rem;
+    }
+    .rsec-body {
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.75;
+    }
+    .scene-note {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 0.75rem;
+    }
+
+    .olist { display: flex; flex-direction: column; gap: 6px; margin-top: 0.75rem; }
+    .oitem { display: flex; gap: 10px; font-size: 13px; color: var(--text-2); line-height: 1.5; }
+    .oname { font-weight: 600; color: var(--text); min-width: 88px; flex-shrink: 0; }
+
+    /* ── ANSWER CARD ── */
+    .acard {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+    }
+    .acard-q {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+      line-height: 1.45;
+    }
+    .acard-a { font-size: 12px; color: var(--text-2); }
+    .acard-a strong { color: var(--text); font-weight: 600; }
+
+    /* ── DROPDOWN ── */
+    .drop-btn {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem 0.9rem;
+      font-size: 12px;
+      color: var(--text-2);
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 0.6rem;
+      transition: all 0.15s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .drop-btn:hover { border-color: var(--border-strong); color: var(--text); }
+
+    .drop-body { display: none; margin-top: 6px; }
+    .drop-body.open { display: block; }
+
+    .phil-row {
+      display: flex;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-2);
+      line-height: 1.5;
+      padding: 0.45rem 0.75rem;
+      background: var(--surface-2);
+      border-radius: var(--radius);
+      margin-bottom: 3px;
+    }
+    .phil-name {
+      font-weight: 600;
+      color: var(--text);
+      min-width: 100px;
+      flex-shrink: 0;
+    }
+
+    .more-btn {
+      width: 100%;
+      text-align: center;
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 0.4rem;
+      font-size: 11px;
+      color: var(--text-3);
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 4px;
+      transition: all 0.15s;
+    }
+    .more-btn:hover { border-color: var(--border-strong); color: var(--text-2); }
+    .more-section { display: none; }
+    .more-section.open { display: block; }
+
+    /* ── PATH ── */
+    .path-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .path-item:last-child { border-bottom: none; }
+    .path-q { font-size: 11px; color: var(--text-3); min-width: 28px; padding-top: 2px; letter-spacing: 0.05em; }
+    .path-ans { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+    .path-sub { font-size: 11px; color: var(--text-3); display: block; margin-top: 1px; }
+
+    /* ── JOURNEY ── */
+    .journey-card {
+      background: var(--surface);
+      border: 1.5px solid var(--accent);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+    }
+    .journey-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+    .journey-body {
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    .journey-scene {
+      font-size: 13px;
+      color: var(--text-2);
+      background: var(--accent-light);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .journey-scene strong { color: var(--text); font-weight: 600; }
+    .journey-quote {
+      font-size: 13px;
+      color: var(--text-3);
+      font-style: italic;
+      border-top: 1px solid var(--border);
+      padding-top: 0.75rem;
+      line-height: 1.65;
+    }
+
+    /* ── DIVIDER ── */
+    .divider { height: 1px; background: var(--border); margin: 0; }
+
+    /* ── FADE IN ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .screen.active { animation: fadeUp 0.3s ease; }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div style="display: flex; flex-direction: column; gap: 0; align-items: center;">
+    <span class="site-ruby">ぱ ら ら っ く す</span>
+    <span class="site-logo" style="line-height: 1;">Parallax</span>
+    <span style="font-size: 9px; color: var(--text-3); letter-spacing: 0.1em; margin-top: 1px;">かんたん哲学</span>
+  </div>
+</header>
+<div class="wrap">
+
+  <!-- INTRO WELCOME -->
+  <div id="s-intro-welcome" class="screen active center">
+    <div style="padding: 2.5rem 0;">
+      <div style="display: inline-block; margin-bottom: 0.5rem;">
+        <h1 class="title-lg" style="margin-bottom: 0.2rem;">あなたはどう選ぶ？</h1>
+      </div>
+      <p class="body-text" style="margin-bottom: 0.5rem;">まず5つの問いに、直感で答えてみて。<br>良いか悪いか。それだけでいい。</p>
+      <p class="sub-text" style="margin-bottom: 2.5rem;">答えた後に、少し揺さぶらせてもらう。</p>
+      <button class="btn-primary" onclick="startIntro()">始める →</button>
+      <br>
+      <button class="btn-ghost" style="margin-top: 1rem;" onclick="showScreen('s-mode')">もうやった → スキップ</button>
+    </div>
+  </div>
+
+  <!-- INTRO QUIZ -->
+  <div id="s-intro-quiz" class="screen">
+    <div class="progress-track"><div class="progress-fill" id="intro-pfill" style="width:0%"></div></div>
+    <div id="intro-qarea"></div>
+  </div>
+
+  <!-- INTRO REVEAL -->
+  <div id="s-intro-reveal" class="screen">
+    <div class="center" style="margin-bottom: 2rem;">
+      <div class="eyebrow">あなたはこう答えた</div>
+      <h2 class="title-md">でも、本当にそう言えるか？</h2>
+      <p class="body-text">同じ問いを、少し違う角度から見てみよう。</p>
+    </div>
+    <div class="stack-md" id="intro-reveal-list"></div>
+    <div class="card-accent center" style="margin-top: 1.75rem;">
+      <div style="font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 0.5rem;">答えが揺らいだなら、哲学が始まった</div>
+      <p class="body-text" style="margin-bottom: 1.25rem;">「当たり前」だと思っていたことが、状況によって変わる。<br>その揺らぎに気づくことが、ものを考えることの始まりだ。</p>
+      <button class="btn-primary" onclick="showScreen('s-mode')">哲学の問いへ進む →</button>
+    </div>
+  </div>
+
+  <!-- MODE SELECT -->
+  <div id="s-mode" class="screen">
+    <div class="center" style="margin-bottom: 2rem;">
+      <div class="eyebrow">モード選択</div>
+      <h2 class="title-md">どちらで考える？</h2>
+    </div>
+    <div class="stack-md">
+      <button class="mode-card" onclick="showScreen('s-theme')">
+        <div class="mode-card-title">深掘りモード</div>
+        <div class="mode-card-desc">一つのテーマを5段階で掘り下げる。答えるたびに問いがきつくなる。</div>
+      </button>
+      <button class="mode-card" onclick="startGeneral()">
+        <div class="mode-card-title">全般モード</div>
+        <div class="mode-card-desc">様々なテーマからランダムに5問。幅広く考えたい人向け。</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- THEME SELECT -->
+  <div id="s-theme" class="screen">
+    <button class="btn-back" onclick="showScreen('s-mode')">← 戻る</button>
+    <div class="eyebrow">深掘りモード</div>
+    <h2 class="title-md" style="margin-bottom: 0.4rem;">テーマを選んで</h2>
+    <p class="sub-text" style="margin-bottom: 1.5rem;">選んだテーマを、5段階で深掘りしていく。</p>
+    <div class="stack-sm">
+      <button class="mode-card" onclick="startDeep('life')">
+        <div class="mode-card-title">命</div>
+        <div class="mode-card-desc">トロッコ問題から始まり、家族・子ども・見知らぬ人の間で揺さぶられる</div>
+      </button>
+      <button class="mode-card" onclick="startDeep('lie')">
+        <div class="mode-card-title">嘘</div>
+        <div class="mode-card-desc">善意の嘘は許されるか。余命を知っている親友に何を言うか</div>
+      </button>
+      <button class="mode-card" onclick="startDeep('steal')">
+        <div class="mode-card-title">所有と命</div>
+        <div class="mode-card-desc">家族が餓死しそうなとき、盗むことは許されるか</div>
+      </button>
+      <button class="mode-card" onclick="startDeep('death')">
+        <div class="mode-card-title">安楽死</div>
+        <div class="mode-card-desc">認めることも、認めないことも、何かを肯定している</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- DEEP QUIZ -->
+  <div id="s-deep-quiz" class="screen">
+    <button class="btn-back" onclick="showScreen('s-mode')">← トップに戻る</button>
+    <div class="progress-track"><div class="progress-fill" id="deep-pfill" style="width:0%"></div></div>
+    <div id="deep-qarea"></div>
+    <div class="nav-row">
+      <button class="btn-primary" id="deep-nbtn" disabled>次へ →</button>
+    </div>
+  </div>
+
+  <!-- DEEP RESULT -->
+  <div id="s-deep-result" class="screen"></div>
+
+  <!-- GENERAL QUIZ -->
+  <div id="s-general-quiz" class="screen">
+    <button class="btn-back" onclick="showScreen('s-mode')">← トップに戻る</button>
+    <div class="progress-track"><div class="progress-fill" id="gen-pfill" style="width:0%"></div></div>
+    <div id="gen-qarea"></div>
+    <div class="nav-row">
+      <button class="btn-primary" id="gen-nbtn" disabled>次へ →</button>
+    </div>
+  </div>
+
+  <!-- GENERAL RESULT -->
+  <div id="s-general-result" class="screen"></div>
+
+</div>
+
+<script>
+// ── UTILS ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function toggleDrop(bodyId, arrId) {
+  const b = document.getElementById(bodyId), a = document.getElementById(arrId);
+  const open = b.classList.contains('open');
+  b.classList.toggle('open');
+  a.textContent = open ? '▾' : '▴';
+}
+
+function toggleMore(bodyId, arrId) {
+  const b = document.getElementById(bodyId), a = document.getElementById(arrId);
+  const open = b.classList.contains('open');
+  b.classList.toggle('open');
+  a.textContent = open ? '▾' : '▴';
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const MAIN_PHILS = ["ベンサム", "カント", "サルトル", "ニーチェ", "アリストテレス"];
+
+function buildPhilRows(list, mainOnly) {
+  return list
+    .filter(p => mainOnly ? MAIN_PHILS.includes(p.n) : !MAIN_PHILS.includes(p.n))
+    .map(p => `<div class="phil-row"><span class="phil-name">${p.n}</span><span>${p.a}</span></div>`)
+    .join('');
+}
+
+function philDropdown(list, uid) {
+  return `
+    <button class="drop-btn" onclick="toggleDrop('dd-${uid}','da-${uid}')">
+      <span>哲学者たちの回答を見る</span><span id="da-${uid}">▾</span>
+    </button>
+    <div class="drop-body" id="dd-${uid}">
+      ${buildPhilRows(list, true)}
+      <button class="more-btn" onclick="toggleMore('dm-${uid}','mb-${uid}')">さらに他の哲学者もみる <span id="mb-${uid}">▾</span></button>
+      <div class="more-section" id="dm-${uid}">${buildPhilRows(list, false)}</div>
+    </div>`;
+}
+
+// ── INTRO ──
+const INTRO_QS = [
+  { q: "見知らぬ人を、理由なく殺すことは許されるか？", choices: ["許されない", "許される"],
+    reveal: {
+      "許されない": "では——自分や家族が今まさに襲われている。相手を殺さなければ自分たちが死ぬ。その場合は？もう体が動かず「死なせてくれ」と頼む患者を安楽死させることは？戦争で、自国を守るために相手国の兵士を殺すことは？どれも「理由なく」ではない。では「理由」があれば、殺しは許されるのか。その線引きは、誰が引くのか。",
+      "許される": "では——あなたの大切な人が見知らぬ人に殺されても、それは許されることになるか。「許される」の根拠はどこにあるのか。"
+    }},
+  { q: "他人のものを、黙って盗むことは許されるか？", choices: ["許されない", "許される"],
+    reveal: {
+      "許されない": "では——あなたの家族が今夜餓死しそうだ。お金はない。近くの家に食料がある。盗まなければ家族が死ぬ。それでも、盗むことは許されないか。",
+      "許される": "では、誰の何を盗んでも許されるか。お金持ちの家から盗むのと、ギリギリで生活している家から盗むのは、同じか。限界はどこにあるのか。"
+    }},
+  { q: "友人が職場でミスをした。あなたはそれを知っている。黙っていることは、正しいか？", choices: ["正しい", "正しくない"],
+    reveal: {
+      "正しい": "では——そのミスで、別の無関係な同僚が不当に責任を取らされているとしたら？黙り続けることで、何も悪いことをしていない人がクビになるとしたら？友人を守ることと、無実の人が罰せられることが、同時に起きているとき。",
+      "正しくない": "では——その友人はあなたの親友で、バレれば確実にクビになる。それでも言うか。正直に言うことで誰かの人生が壊れるとき、正直さは美徳か。"
+    }},
+  { q: "自分の大切な人を守ることは、正しいか？", choices: ["正しい", "正しくない"],
+    reveal: {
+      "正しい": "では——その大切な人が、誰かを殺した。あなただけがそれを知っている。黙れば逃げ切れるかもしれない。「大切な人を守る」ことは、ここでも正しいか。被害者の家族は、今も行方を探している。",
+      "正しくない": "では——あなた自身が今、誰かに襲われている。大切な人が助けに来てくれた。その人の助けを、あなたは断るか。自分を守ることが正しくないなら、守られることも拒否するべきか。どこに線があるのか。"
+    }},
+  { q: "自由に生きることは、良いことか？", choices: ["良い", "良くない"],
+    reveal: {
+      "良い": "では——自分の快楽のために他人を殴ることも、自由か。相手を騙して金を奪うことも、「自由に生きた結果」か。自由の限界はどこで、誰が決めるのか。",
+      "良くない": "では——あなたの人生の選択を、誰かが決めるとしたら受け入れられるか。どの仕事に就くか、誰と付き合うか、どこに住むか。自由が良くないなら、代わりに何があるべきか。"
+    }}
+];
+
+let introAnswers = [], introCur = 0;
+
+function startIntro() {
+  introCur = 0; introAnswers = [];
+  showScreen('s-intro-quiz');
+  renderIntroQ();
+}
+
+function renderIntroQ() {
+  const q = INTRO_QS[introCur];
+  document.getElementById('intro-pfill').style.width = (introCur / INTRO_QS.length * 100) + '%';
+  document.getElementById('intro-qarea').innerHTML = `
+    <div class="card">
+      <div class="q-num">Q${introCur + 1} / ${INTRO_QS.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="choices">
+        ${q.choices.map((c, i) => `
+          <button class="choice-btn" onclick="selectIntro(${i}, '${c}')">
+            <span class="choice-label">${['A','B'][i]}</span>
+            <span class="choice-text">${c}</span>
+          </button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function selectIntro(i, val) {
+  const q = INTRO_QS[introCur];
+  introAnswers.push({ q: q.q, ans: val, reveal: q.reveal[val] });
+  introCur++;
+  setTimeout(() => {
+    if (introCur >= INTRO_QS.length) showIntroReveal();
+    else renderIntroQ();
+  }, 180);
+}
+
+function showIntroReveal() {
+  document.getElementById('intro-pfill').style.width = '100%';
+  document.getElementById('intro-reveal-list').innerHTML = introAnswers.map((a, i) => `
+    <div class="reveal-card">
+      <div class="reveal-q">Q${i+1}. ${a.q}</div>
+      <div class="reveal-ans">あなたの答え：<strong>${a.ans}</strong></div>
+      <div class="reveal-hit">${a.reveal}</div>
+    </div>`).join('');
+  showScreen('s-intro-reveal');
+}
+
+// ── PHILOSOPHER DATA ──
+const ALL_Q_PAS = {
+  trolley:[{n:"ベンサム",a:"引く。5人の幸福の総量が上回る"},{n:"カント",a:"引かない。1人を手段として扱うことは義務に反する"},{n:"サルトル",a:"どちらを選んでも、選んだこと自体があなたの本質になる"},{n:"ニーチェ",a:"引く。力ある判断を"},{n:"アリストテレス",a:"引く。徳ある人は最善の結果を目指す"},{n:"レヴィナス",a:"引かない。目の前の1人の顔が先にある"},{n:"プラトン",a:"引く。理性的に最善を選ぶのが正義"},{n:"ルソー",a:"引かない。自然な憐れみが手を止める"},{n:"ミル",a:"引く。最大多数の最大幸福"},{n:"パスカル",a:"引く。不確実な状況では被害を最小化せよ"},{n:"スピノザ",a:"引く。自然の必然として最善を選ぶ"},{n:"カミュ",a:"引く。不条理な状況でも行動することが人間だ"},{n:"ハイデガー",a:"引く。死を直視した上で、本来の判断をせよ"}],
+  sns_old:[{n:"ベンサム",a:"教える。就活への影響を最小化するのが全体の利益"},{n:"カント",a:"教える。真実を伝えることは義務"},{n:"サルトル",a:"まず教えて、どうするかは本人に選ばせる"},{n:"ニーチェ",a:"教える。知らないまま負けるのは弱さだ"},{n:"アリストテレス",a:"教える。友人への誠実さが徳"},{n:"レヴィナス",a:"削除まで試みる。目の前の人を守ることが先"},{n:"プラトン",a:"教える。真実は常に知るべきだ"},{n:"ルソー",a:"教える。自然な善意に従え"},{n:"ミル",a:"教える。本人の長期的な幸福を優先"},{n:"パスカル",a:"教える。友を思いやる誠実さが信仰の実践"},{n:"スピノザ",a:"教える。真実を知ることが自由への道"},{n:"カミュ",a:"教える。不誠実な沈黙より、誠実な行動を"},{n:"ハイデガー",a:"教える。本来の自己として向き合え"}],
+  three_group:[{n:"ベンサム",a:"黙って関係を維持する。全員の幸福が保たれる"},{n:"カント",a:"両方に伝える。隠蔽は義務に反する"},{n:"サルトル",a:"どうするかを選んだとき、それがお前の本質になる"},{n:"ニーチェ",a:"距離を置く。他人の期待に応え続けることに意味はない"},{n:"アリストテレス",a:"状況を見て中庸を取る。傷つけない方法を探す"},{n:"レヴィナス",a:"両方の顔に向き合う。逃げずに応答することが責任"},{n:"プラトン",a:"真実を伝える。知らないままでいることは魂に悪い"},{n:"ルソー",a:"伝える。不誠実な関係は社会を腐らせる"},{n:"ミル",a:"伝える。長期的には真実のほうが全員の幸福になる"},{n:"パスカル",a:"正直に伝える。神の前に誠実であれ"},{n:"スピノザ",a:"距離を置く。感情のもつれより理性的な関係を選べ"},{n:"カミュ",a:"正直に伝える。不誠実な平和は不条理だ"},{n:"ハイデガー",a:"距離を置く。「ひと」に埋没した関係から抜け出せ"}],
+  murder_friend:[{n:"ベンサム",a:"通報する。社会全体への影響を考えると最大多数の利益"},{n:"カント",a:"通報する。法と義務は感情に優先する"},{n:"サルトル",a:"自首を促す。逃げ続ける人生は本人の自由を奪う"},{n:"ニーチェ",a:"匿う。社会の道徳に縛られる必要はない"},{n:"アリストテレス",a:"自首を促す。真の友人は友の真の利益を考える"},{n:"レヴィナス",a:"匿う。目の前で泣いている友の顔が先にある"},{n:"プラトン",a:"通報する。正義のイデアは個人の感情より上位にある"},{n:"ルソー",a:"匿う。自然状態では法より人間的な絆が先"},{n:"ミル",a:"通報する。個人の自由は他者を傷つけない範囲でのみ認められる"},{n:"パスカル",a:"通報する。神の前に誠実であれ"},{n:"スピノザ",a:"通報する。理性に従えば社会の秩序を守るべきだ"},{n:"カミュ",a:"自首を促す。不条理から逃げるな、向き合え"},{n:"ハイデガー",a:"自首を促す。本来の自己として責任を引き受けよ"}],
+  remain_life:[{n:"ベンサム",a:"愛する人と過ごす。それが最大の幸福量を生む"},{n:"カント",a:"今まで通り生きる。義務を全うすることが人間の本分"},{n:"サルトル",a:"やりたいことをやる。死を前にして初めて本当の選択ができる"},{n:"ニーチェ",a:"今まで通り生きる。永遠に繰り返してもいいと言える今日を生きろ"},{n:"アリストテレス",a:"両方バランスよく。徳ある人は極端に走らない"},{n:"レヴィナス",a:"愛する人と過ごす。他者との関係こそが存在の意味"},{n:"プラトン",a:"哲学を続ける。ソクラテスのように、死の前に魂を磨け"},{n:"ルソー",a:"自然の中に帰る。文明から離れ、本来の自分に戻れ"},{n:"ミル",a:"やりたいことをやる。質の高い幸福を追求せよ"},{n:"パスカル",a:"信仰と和解する。死の前に神と向き合え"},{n:"スピノザ",a:"今まで通り生きる。死は恐れるものではなく、自然の一部だ"},{n:"カミュ",a:"やりたいことをやる。不条理に反抗しながら、生を燃やせ"},{n:"ハイデガー",a:"死を直視して本来の生を生きる。今こそ本来の自己になれ"}],
+  discrimination:[{n:"ベンサム",a:"公開で指摘する。社会全体への悪影響を止める"},{n:"カント",a:"指摘する。差別は普遍的義務に反する"},{n:"サルトル",a:"指摘する。沈黙も選択であり、共犯になりうる"},{n:"ニーチェ",a:"距離を置く。他人の道徳裁判に参加する必要はない"},{n:"アリストテレス",a:"直接伝える。友人への誠実さと礼儀を両立"},{n:"レヴィナス",a:"直接伝える。その人の顔に向き合う"},{n:"プラトン",a:"対話を求める。無知から来る発言なら知識で導ける"},{n:"ルソー",a:"公開で指摘する。自然な善性を取り戻すよう促す"},{n:"ミル",a:"公開で指摘する。言論の自由は批判の自由も含む"},{n:"パスカル",a:"直接伝える。愛をもって語れ"},{n:"スピノザ",a:"対話を求める。理性で相手を導け"},{n:"カミュ",a:"公開で指摘する。不条理な差別に反抗せよ"},{n:"ハイデガー",a:"距離を置く。「ひと」の同調圧力から自由であれ"}],
+  fraud:[{n:"ベンサム",a:"証拠を集めてから告発。最大の効果を狙う"},{n:"カント",a:"告発する。不正を見て見ぬふりは義務違反"},{n:"サルトル",a:"告発する。沈黙も選択であり、その責任を負う"},{n:"ニーチェ",a:"自分の判断で動く。組織の道徳に縛られるな"},{n:"アリストテレス",a:"内部で解決を試みる。中庸を取りながら"},{n:"レヴィナス",a:"被害者の顔を思う。その人たちへの責任が先"},{n:"プラトン",a:"告発する。不正な組織は魂を腐らせる"},{n:"ルソー",a:"告発する。社会契約への裏切りは許されない"},{n:"ミル",a:"告発する。社会の害を防ぐことが個人の義務"},{n:"パスカル",a:"告発する。良心に従うことが神の前の誠実さ"},{n:"スピノザ",a:"告発する。理性が示す正しい行いに従え"},{n:"カミュ",a:"告発する。不条理な不正に反抗することが人間の誠実さ"},{n:"ハイデガー",a:"告発する。本来の自己として、流れに乗るな"}],
+  care:[{n:"ベンサム",a:"施設を選ぶ。専門的ケアが全員の幸福を最大化する"},{n:"カント",a:"自分で介護する。親への義務は感情に関係なく存在する"},{n:"サルトル",a:"親と一緒に決める。本人の選択を尊重せよ"},{n:"ニーチェ",a:"自分の人生を優先する。自己犠牲に美徳はない"},{n:"アリストテレス",a:"中間を探す。可能な範囲で介護しつつ施設も活用"},{n:"レヴィナス",a:"自分で介護する。目の前の他者への応答が先"},{n:"プラトン",a:"施設を選ぶ。最善のケアが正義"},{n:"ルソー",a:"自分で介護する。自然な家族の絆を大切に"},{n:"ミル",a:"親と一緒に決める。本人の自由と選択が最優先"},{n:"パスカル",a:"自分で介護する。愛の行為は神の意志に沿う"},{n:"スピノザ",a:"施設を選ぶ。感情に流されず、最善の手段を理性で選べ"},{n:"カミュ",a:"自分で介護する。不条理に抗いながら、目の前の人に向き合え"},{n:"ハイデガー",a:"親と一緒に決める。死を前にした本来の関係性として向き合え"}],
+  misinfo:[{n:"ベンサム",a:"伝える。健康への影響を考えると伝えたほうが全体の利益"},{n:"カント",a:"伝える。真実を伝えることは義務"},{n:"サルトル",a:"伝える。でも選ぶのは本人。それが自由だ"},{n:"ニーチェ",a:"触れない。他人の信念に介入する必要はない"},{n:"アリストテレス",a:"さりげなく共有する。中庸を取りながら"},{n:"レヴィナス",a:"伝える。その人の顔に向き合う責任がある"},{n:"プラトン",a:"対話を通じて導く。知識への愛が人を真実に近づける"},{n:"ルソー",a:"伝える。自然な善意に従え"},{n:"ミル",a:"触れない。本人が求めるまでは個人の信念に介入すべきでない"},{n:"パスカル",a:"伝える。愛する者の健康を守ることが誠実さ"},{n:"スピノザ",a:"伝える。真実を知ることが自由への道"},{n:"カミュ",a:"伝える。誠実であることが不条理への反抗だ"},{n:"ハイデガー",a:"伝える。「ひと」の流言に流されず、本来の真実を示せ"}],
+  war:[{n:"ベンサム",a:"有効な方法を選んで声を上げる。効果がある手段が最善"},{n:"カント",a:"公に反対する。良心に従うことは義務"},{n:"サルトル",a:"声を上げる。沈黙も選択であり、共犯になりうる"},{n:"ニーチェ",a:"自分の価値観に従って動く。国家の道徳に縛られるな"},{n:"アリストテレス",a:"法の範囲内で意思を示す。社会の一員として中庸を保つ"},{n:"レヴィナス",a:"被害を受ける他者の顔を思う。その応答として行動する"},{n:"プラトン",a:"哲人が政治に参加すべき。知者は黙っていてはならない"},{n:"ルソー",a:"デモや署名活動。社会契約への異議申し立ては市民の権利"},{n:"ミル",a:"声を上げる。言論の自由こそ民主主義の根幹"},{n:"パスカル",a:"良心に従い静かに反対する。神の前に誠実であれ"},{n:"スピノザ",a:"理性的な手段で反対する。感情的な行動より冷静な判断を"},{n:"カミュ",a:"公に反抗する。不条理な暴力に沈黙することは敗北だ"},{n:"ハイデガー",a:"本来の自己として行動する。「ひと」の流れに流されるな"}],
+  secret:[{n:"ベンサム",a:"専門家に繋げる。友人の長期的な幸福が最優先"},{n:"カント",a:"約束を守る義務はあるが、危険が迫れば義務が衝突する"},{n:"サルトル",a:"本人に選択させる。でも選択の結果の責任も本人が負う"},{n:"ニーチェ",a:"状況を見て自分の判断で動く"},{n:"アリストテレス",a:"説得する。友人の真の利益のために"},{n:"レヴィナス",a:"一緒に病院を探す。その人の顔に向き合い続ける"},{n:"プラトン",a:"説得する。真の友人は真の善を求める"},{n:"ルソー",a:"自然な感情に従う。友人を助けることが先"},{n:"ミル",a:"本人の了解を得てから動く。自律性を尊重しつつ助ける"},{n:"パスカル",a:"動く。愛する者の命を守ることが信仰の実践"},{n:"スピノザ",a:"動く。理性が示す最善を選べ"},{n:"カミュ",a:"動く。友の苦しみに向き合うことが誠実さだ"},{n:"ハイデガー",a:"本来の関係として向き合う。死に向かう存在として友を支えよ"}],
+  law_vs_conscience:[{n:"ベンサム",a:"状況次第。誰も傷つかないなら良心に従う"},{n:"カント",a:"法に従う。感情で法を破ると普遍性が失われる"},{n:"サルトル",a:"良心に従う。自分の選択こそが自分の本質"},{n:"ニーチェ",a:"良心に従う。羊の道徳に縛られるな"},{n:"アリストテレス",a:"法を変える努力をする。市民としての徳"},{n:"レヴィナス",a:"他者への影響を考える。法より他者の顔が先"},{n:"プラトン",a:"正義のイデアに従う。悪法は法ではない"},{n:"ルソー",a:"法を変えるために動く。社会契約は書き換えられる"},{n:"ミル",a:"法を変えるために行動する。言論と行動で社会を変えよ"},{n:"パスカル",a:"良心に従う。神の法が人の法より上位にある"},{n:"スピノザ",a:"法に従いつつ、理性で社会を変えよ"},{n:"カミュ",a:"良心に従う。不条理な法への反抗が誠実さだ"},{n:"ハイデガー",a:"本来の自己として選ぶ。「ひと」の定めたルールに盲目的に従うな"}],
+  career_vs_love:[{n:"ベンサム",a:"天秤にかけて判断する。どちらがより幸福をもたらすか"},{n:"カント",a:"義務に従う。感情より理性的な判断を"},{n:"サルトル",a:"手放さない。自分の核を守ることが自分の存在の証"},{n:"ニーチェ",a:"手放さない。自己を超えることが力への意志"},{n:"アリストテレス",a:"第三の道を探す。中庸こそが徳の道"},{n:"レヴィナス",a:"手放す。他者の顔への応答が存在の意味"},{n:"プラトン",a:"第三の道を探す。真の智者は二択に見えない選択肢を見つける"},{n:"ルソー",a:"手放す。他者への自然な憐れみに従え"},{n:"ミル",a:"第三の道を探す。個人の自由と他者の幸福の両立を目指せ"},{n:"パスカル",a:"手放す。愛のための犠牲は信仰の実践"},{n:"スピノザ",a:"理性で判断する。感情に流されず、長期的な善を見よ"},{n:"カミュ",a:"手放さない。自分の情熱に忠実に生きることが反抗だ"},{n:"ハイデガー",a:"本来の自己として選ぶ。死を意識したとき、何が本当に大事かが見える"}],
+  nazi:[{n:"ベンサム",a:"嘘をつく。結果として最も多くの命が救われる"},{n:"カント",a:"正直に答える。嘘は普遍的に許されない"},{n:"サルトル",a:"嘘をつく。その選択があなたの本質を決める"},{n:"ニーチェ",a:"嘘をつく。生を守ることが力の表現"},{n:"アリストテレス",a:"はぐらかす。状況に応じた最善を探す"},{n:"レヴィナス",a:"嘘をつく。目の前の他者の命が先にある"},{n:"プラトン",a:"正直に答える。魂の誠実さは何より大切"},{n:"ルソー",a:"嘘をつく。自然な憐れみに従え"},{n:"ミル",a:"嘘をつく。他者の命を守ることが最大の幸福"},{n:"パスカル",a:"嘘をつく。命を守ることが神の愛の実践"},{n:"スピノザ",a:"嘘をつく。理性が命の保護を最善と示す"},{n:"カミュ",a:"嘘をつく。不条理な暴力への反抗として命を守れ"},{n:"ハイデガー",a:"嘘をつく。本来の判断として、死への存在を守れ"}],
+  river:[{n:"ベンサム",a:"走って助けを呼ぶ。共倒れを避けて最大の結果を"},{n:"カント",a:"できる限りのことをする。義務の範囲で"},{n:"サルトル",a:"飛び込む。その選択があなたの本質になる"},{n:"ニーチェ",a:"自分の判断で動く。弱さから逃げるな"},{n:"アリストテレス",a:"両方同時に試みる。中庸を取れ"},{n:"レヴィナス",a:"飛び込む。目の前の他者の顔が先にある"},{n:"プラトン",a:"最善の判断を理性で下せ"},{n:"ルソー",a:"飛び込む。自然な憐れみに従え"},{n:"ミル",a:"走って助けを呼ぶ。効果的な援助が最大の幸福"},{n:"パスカル",a:"飛び込む。命をかけた愛の行為こそ信仰"},{n:"スピノザ",a:"走って助けを呼ぶ。感情より理性的な最善を選べ"},{n:"カミュ",a:"飛び込む。不条理な状況でも行動することが人間だ"},{n:"ハイデガー",a:"飛び込む。死を前にして本来の自己として行動せよ"}],
+  forgive:[{n:"ベンサム",a:"許す。自分の幸福のためにも、怒りを手放すほうがいい"},{n:"カント",a:"赦しは義務ではない。でも人間の尊厳は尊重する"},{n:"サルトル",a:"関わらない。自分の人生の選択者であれ"},{n:"ニーチェ",a:"許さない。怨恨を力に変えろ"},{n:"アリストテレス",a:"様子を見る。徳は時間をかけて確認される"},{n:"レヴィナス",a:"許す。他者の顔に向き合い続けることが責任"},{n:"プラトン",a:"許す。魂の浄化のために"},{n:"ルソー",a:"許す。人間の本来の善さを信じる"},{n:"ミル",a:"自分で決める。この選択はあなた自身のものだ"},{n:"パスカル",a:"許す。神の赦しにならえ"},{n:"スピノザ",a:"許す。憎しみは自分を縛る感情だ。理性で解放せよ"},{n:"カミュ",a:"関わらない。不条理な過去に縛られず、今を生きよ"},{n:"ハイデガー",a:"自分で決める。死を意識した本来の自己として向き合え"}],
+  isolation:[{n:"ベンサム",a:"強制隔離する。多数の幸福が優先"},{n:"カント",a:"強制隔離しない。無実の人を手段にできない"},{n:"サルトル",a:"説得する。本人が選択できる余地を残す"},{n:"ニーチェ",a:"強制隔離する。弱者の感傷より社会の強さを"},{n:"アリストテレス",a:"説得して自主隔離を求める。中庸を取れ"},{n:"レヴィナス",a:"説得する。その人の顔に向き合いながら"},{n:"プラトン",a:"強制隔離する。共同体の秩序が先"},{n:"ルソー",a:"説得する。社会契約は強制ではなく合意に基づく"},{n:"ミル",a:"強制隔離しない。他者への実害が確定していない段階で自由を奪えない"},{n:"パスカル",a:"説得する。愛をもって語りかけよ"},{n:"スピノザ",a:"強制隔離する。理性が社会全体の保護を命じる"},{n:"カミュ",a:"説得する。強制は人間の尊厳を傷つける"},{n:"ハイデガー",a:"説得する。強制は本来の自己との関係を壊す"}],
+  animal:[{n:"ベンサム",a:"やむを得ない。苦痛の総量を最小化する形で"},{n:"カント",a:"代替手段を探す。理性的存在でない生き物への義務も問われる"},{n:"サルトル",a:"人間が選択し、その責任を引き受ける"},{n:"ニーチェ",a:"人間の発展のためなら許容される"},{n:"アリストテレス",a:"種や苦痛の程度で判断する。中庸を取れ"},{n:"レヴィナス",a:"動物の苦しみにも向き合う。顔を持つものへの責任"},{n:"プラトン",a:"理性で最善を判断せよ"},{n:"ルソー",a:"自然への敬意を忘れるな。動物も自然の一部"},{n:"ミル",a:"苦痛を感じる能力があるものは道徳的配慮を受けるべき"},{n:"パスカル",a:"代替手段を探す。神の創造物への敬意を"},{n:"スピノザ",a:"やむを得ない。自然の必然として、人間の保存が優先される"},{n:"カミュ",a:"代替手段を探す。不必要な苦しみへの反抗が誠実さだ"},{n:"ハイデガー",a:"代替手段を探す。技術による自然支配の問題を直視せよ"}]
+};
+
+function getPas(key) { return ALL_Q_PAS[key] || []; }
+
+// ── GENERAL MODE ──
+const ALL_QS = [
+  {id:1,key:"trolley",text:"暴走するトロッコが5人に向かっている。レバーを引けば進路が切り替わり、1人が死ぬ。どうする？",premise:"ブレーキは壊れている。5人にも1人にも声は届かない。他に手段はない。",hint:"引けば5人助かる。でもあなたが引いたことで1人が死ぬ。「何もしない」は本当に責任から逃れることになるんだろうか？",choices:[{l:"A",t:"引く（1人を死なせて、5人を助ける）",s:{bentham:2}},{l:"B",t:"引かない（1人は助かるが、5人が死ぬ）",s:{kant:2}}]},
+  {id:2,key:"sns_old",text:"就活中の親友のSNSに、本人が忘れている黒歴史投稿を発見した。教えるか？",premise:"誰でも見られる状態。面接官が見れば落とされるレベル。本人はまだ気づいていない。",hint:"教えれば親切かもしれない。でも知らせることで傷つくかもしれない。そっとしておけば今日は傷つかない。でも後から発覚したとき、知ってたのに言わなかったことになる。",choices:[{l:"A",t:"教える。知らないまま落とされるほうが後から辛い",s:{kant:2}},{l:"B",t:"そっとしておく。気づくかどうかは本人に委ねたい",s:{sartre:1,bentham:1}},{l:"C",t:"自分で削除申請を試みてから、教える",s:{levinas:2}}]},
+  {id:3,key:"three_group",text:"仲良し3人グループ。AがBの悪口をこっそり言ってきた。実はBもAの悪口をあなたに言っていた。どうする？",premise:"AもBもあなたを信頼している。お互いの悪口を言っていることを、どちらも知らない。",hint:"正直に伝えれば関係が壊れるかもしれない。黙れば今日の平和は守られる。でもその秘密を両方に対して抱え続けることになる。",choices:[{l:"A",t:"両方に正直に話す。秘密を抱え続けるほうがしんどい",s:{kant:2}},{l:"B",t:"黙って両方と付き合い続ける。それが現実的だと思う",s:{bentham:2}},{l:"C",t:"その3人関係から、自分だけそっと距離を置く",s:{nietzsche:2}}]},
+  {id:4,key:"murder_friend",text:"10年来の親友から連絡。「人を殺してしまった。誰にも言わないで」。どうする？",premise:"事故ではなく、意図的だったようだ。被害者の家族は今も行方を探している。",hint:"匿えば友を守れる。でも被害者の家族はずっと知らないままになる。「正しいこと」と「この人を守ること」が同じ方向を向いていない。",choices:[{l:"A",t:"匿う。この人を守ることが今の自分の責任だと思う",s:{levinas:2}},{l:"B",t:"通報する。被害者の家族のことを考えると黙っていられない",s:{kant:2}},{l:"C",t:"自首を一緒に考える。逃げ続けることは友のためにもならない",s:{sartre:2}}]},
+  {id:5,key:"remain_life",text:"余命1年と宣告された。治療法はない。残りの時間、どう生きるか？",premise:"今のところ身体は動く。家族も友人もいる。自由に選ぶ権利がある。",hint:"何を選んでも、何かを諦めることになる。",choices:[{l:"A",t:"愛する人たちと、できる限り一緒にいる",s:{levinas:2}},{l:"B",t:"ずっとやりたかったことをやり尽くす",s:{sartre:2}},{l:"C",t:"今まで通りの自分らしい毎日を送る",s:{nietzsche:2}}]},
+  {id:6,key:"discrimination",text:"友人がSNSで特定のグループへの差別的な発言をしていた。どうする？",premise:"その友人とは普段仲がいい。投稿は公開されている。",hint:"指摘すれば誠実かもしれない。でも関係が壊れるかもしれない。黙れば見て見ぬふりになる。",choices:[{l:"A",t:"公開でコメントして指摘する",s:{kant:2}},{l:"B",t:"直接本人にだけ伝える",s:{aristotle:2}},{l:"C",t:"黙って距離を置く",s:{nietzsche:2}},{l:"D",t:"何もしない",s:{bentham:1}}]},
+  {id:7,key:"fraud",text:"会社が顧客を欺いている不正を偶然知った。上司も関与しているようだ。どうする？",premise:"自分は直接関わっていない。内部告発すればキャリアに影響が出るかもしれない。",hint:"告発すれば正しいかもしれない。でも自分の生活が壊れるかもしれない。",choices:[{l:"A",t:"外部に内部告発する",s:{kant:2}},{l:"B",t:"社内の別のルートで報告を試みる",s:{aristotle:2}},{l:"C",t:"証拠を集めてから動く",s:{bentham:2}},{l:"D",t:"知らないふりをして何もしない",s:{nietzsche:1,sartre:1}}]},
+  {id:8,key:"care",text:"親が認知症になってきた。施設に入れるか、自分で介護するか。",premise:"施設は費用がかかるが専門的なケアが受けられる。自分で介護すれば仕事もプライベートも大きく制限される。親は「できれば家にいたい」と言っている。",hint:"「愛すること」と「自分を守ること」は両立するのか？",choices:[{l:"A",t:"できる限り自分で介護する。親への責任だと思う",s:{levinas:2}},{l:"B",t:"施設を選ぶ。専門家の方が質の高いケアができる",s:{bentham:2}},{l:"C",t:"親と話し合って一緒に決める",s:{mill:2,sartre:1}}]},
+  {id:9,key:"misinfo",text:"友人がSNSで広まった誤情報を信じ込んでいる。健康に影響する可能性がある。どうする？",premise:"指摘すると怒るかもしれない。でも放置すれば体に悪影響が出るかもしれない。",hint:"「正しいこと」と「関係を守ること」はどちらが大事？",choices:[{l:"A",t:"証拠を持って正面から伝える",s:{kant:2}},{l:"B",t:"正しい情報をさりげなく共有する（直接指摘はしない）",s:{aristotle:2}},{l:"C",t:"自分からは触れない（聞かれたら答える）",s:{mill:2,sartre:1}}]},
+  {id:10,key:"war",text:"自分の国が、あなたが不当だと思う戦争を始めた。どうする？",premise:"民主的なプロセスを経て決定された。徴兵はまだない。税金は使われる。",hint:"「個人の良心」と「社会のルール」の間で、あなたはどこに立つ？",choices:[{l:"A",t:"デモや署名など合法的な手段で反対の意思を示す",s:{rousseau:2,mill:1}},{l:"B",t:"反対だが、個人でできることは限られているので静かに生活する",s:{aristotle:2}},{l:"C",t:"特に何もしない",s:{nietzsche:1,bentham:1}},{l:"D",t:"国外に出ることを考える",s:{sartre:2}}]},
+  {id:11,key:"secret",text:"親友から打ち明けられた。「3ヶ月前から食事がほとんど食べられていない。体重が激減している。でも誰にも言わないで」。どうする？",premise:"摂食障害の可能性がある。本人は病院には絶対行きたくないと言っている。",hint:"「約束」と「相手の安全」のどちらが先？",choices:[{l:"A",t:"約束を守って秘密にしておく。本人の意思を尊重する",s:{mill:2,sartre:1}},{l:"B",t:"本人が専門家に相談するよう説得し続ける",s:{aristotle:2,kant:1}},{l:"C",t:"本人の了解を得てから、一緒に病院を探す",s:{levinas:2,mill:1}},{l:"D",t:"約束を破ってでも、家族や専門家に連絡する",s:{kant:2}}]},
+  {id:12,key:"law_vs_conscience",text:"法律が「ダメ」と言っていても、自分の良心が「これは許される」と感じるとき、どうする？",premise:"例①：家族が重い病気で薬代が払えない。薬局から薬を盗むしかない。例②：大麻は違法だが他人に迷惑をかけないなら個人の自由では、と思っている。",hint:"「個人の正義」と「社会のルール」のどちらが先にある？",choices:[{l:"A",t:"良心に従って行動する",s:{nietzsche:2,sartre:1}},{l:"B",t:"法に従う。個人が勝手に判断し始めると社会が崩壊する",s:{kant:2,rousseau:1}},{l:"C",t:"法を変えるために合法的に動く。今は従う",s:{mill:2,rousseau:1}}]},
+  {id:13,key:"career_vs_love",text:"人生で一番大切にしてきたキャリアを捨てれば、大切な人と一緒に住める。でもそのキャリアはあなたのアイデンティティの核になっている。どうする？",premise:"相手に悪意はない。ただ生活の場所が合わない。どちらかが折れるしかない状況。",hint:"どちらを選んでも、何かが消える。",choices:[{l:"A",t:"キャリアを手放す。その人のためなら惜しくない",s:{levinas:2,rousseau:1}},{l:"B",t:"手放さない。自分の核を失えば残りが空洞になる",s:{sartre:2,nietzsche:1}},{l:"C",t:"二択だと思い込んでいるだけかもしれない。第三の道を探す",s:{aristotle:2,plato:1}}]},
+  {id:14,key:"nazi",text:"ナチス兵があなたの家に来て「ここにユダヤ人はいるか」と聞いてきた。あなたの家には一家が隠れている。どうする？",premise:"嘘をつけばその一家は助かるかもしれない。でもバレた場合、あなたも家族も収容所に送られる可能性がある。正直に答えれば一家は連行される。",hint:"嘘をつくことは道徳的に許されるか。でも自分の家族も危険にさらすことになる。",choices:[{l:"A",t:"嘘をつく（リスクがあっても命を守ることが先だ）",s:{levinas:2,rousseau:1}},{l:"B",t:"正直に答える（嘘は何があってもつけない）",s:{kant:2}},{l:"C",t:"答えをはぐらかして時間を稼ぐ",s:{aristotle:2,sartre:1}}]},
+  {id:15,key:"river",text:"川で人が流されているのを見た。飛び込むか、助けを呼びに走るか。",premise:"あと数分で溺死する可能性が高い。助けを呼びに走れば間に合わないかもしれない。飛び込めば自分も危険だが助けられる可能性はある。周りに人はいない。",hint:"見知らぬ人のために自分の命をどこまでリスクにさらせるか。",choices:[{l:"A",t:"飛び込む（間に合わないなら自分が行くしかない）",s:{levinas:2,rousseau:1}},{l:"B",t:"走って助けを呼ぶ（共倒れになるほうが最悪だ）",s:{bentham:2,kant:1}},{l:"C",t:"岸から叫びながら何かを投げ込みつつ、同時に助けも呼ぶ",s:{aristotle:2}}]},
+  {id:16,key:"forgive",text:"10年前に自分を深く傷つけた人物が、更生して謝罪してきた。どうする？",premise:"周囲はもう許してやれと言っている。本人は変わったように見える。でも、されたことは消えない。",hint:"「赦し」は相手のためか、自分のためか。",choices:[{l:"A",t:"許す。人は変われると思うから",s:{rousseau:2,levinas:1}},{l:"B",t:"許さない。されたことは消えない",s:{nietzsche:2,kant:1}},{l:"C",t:"許す・許さないより、もう関わらない",s:{sartre:2}},{l:"D",t:"誠意を見せ続けてくれれば、少しずつ考える",s:{aristotle:2}}]},
+  {id:17,key:"isolation",text:"感染症が拡大している。感染源の可能性が高い人物を、確定前に強制隔離すべきか？",premise:"強制隔離すれば多くの人が助かるかもしれない。でも感染はまだ確定していない。その人は「隔離されたくない」と言っている。",hint:"個人の権利と集団の安全は、どちらが先？",choices:[{l:"A",t:"強制隔離すべき。多数の命が優先される",s:{bentham:2,mill:1}},{l:"B",t:"強制隔離はすべきでない。確定もしていない個人の自由を奪えない",s:{kant:2,mill:1}},{l:"C",t:"本人を説得して自主隔離を求める",s:{aristotle:2,rousseau:1}}]},
+  {id:18,key:"animal",text:"医学の発展のために動物実験が行われている。あなたはどう思うか？",premise:"動物実験によって多くの人命が救われてきた。一方で、動物は苦痛を感じる。完全な代替手段はまだない。",hint:"命の価値に差をつけることは正当化されるか？",choices:[{l:"A",t:"人間の命が救われるなら、やむを得ない",s:{bentham:2,mill:1}},{l:"B",t:"動物にも苦しむ権利はない。代替手段を最大限探すべき",s:{kant:2,rousseau:1}},{l:"C",t:"動物の種類や苦痛の程度によって判断が変わる",s:{aristotle:2}},{l:"D",t:"どんな理由があっても動物実験は許されない",s:{kant:2,levinas:1}}]}
+];
+
+const PHIL_DEFS = {
+  bentham:{axis:"悩んだとき、最終的に「結果」を優先するでしょう",phil:"ジェレミー・ベンサム（功利主義）",tagline:"「何人が、どれだけ幸せになるか」で物事を測ろうとするでしょう。",reality:"職場でプロジェクトの方針を決めるとき、「どの選択が最もいい結果を生むか」を自然に考えていませんか。政策や制度の話になると「誰が・どれだけ影響を受けるか」に目が向きやすいはず。",scenes:"友人と意見が割れたとき / 組織でルールを決めるとき",others:[{n:"カント",t:"「結果より動機が大事」と言うはず"},{n:"サルトル",t:"「計算より、選んだ瞬間の自分の本質が問われる」"},{n:"ニーチェ",t:"「多数派の幸福を優先するのは弱者の発想」と反論するかも"}],journey:"今日あなたは、素通りしていた選択に改めて向き合った。「誰がどれだけ影響を受けるか」を問うクセを知っておくと、次に似た場面で落ち着いて考えられる。",quote:"次に「みんなのためだから」という言葉を聞いたとき、あなたはその「みんな」の顔を数えるだろう。",theme:"友人と意見が割れたとき / 組織でルールを決めるとき / 誰かのために何かを犠牲にするか悩むとき——"},
+  kant:{axis:"悩んだとき、最終的に「原則」を優先するでしょう",phil:"イマヌエル・カント（義務論）",tagline:"結果がどうであれ、やっていいこととダメなことの線引きを大切にするでしょう。",reality:"「空気を読んで嘘をついたほうが丸く収まる」場面でも、なぜかそれができない——そんな経験ありませんか。",scenes:"「みんなやってるから」という圧力を感じるとき / ルールと感情が対立するとき",others:[{n:"ベンサム",t:"「でも5人助かるじゃないか」と言うはず"},{n:"サルトル",t:"「原則より、選んだ瞬間の自分を見ろ」"},{n:"アリストテレス",t:"「状況に応じた中庸を探せ」"}],journey:"自分の中に「ここは譲れない」という軸がどこにあるかを知っておくと、いざというとき迷いが少なくなる。",quote:"次に「みんなやってるから」という圧力を感じたとき、あなたの中の何かが「でも」と言い始めるだろう。",theme:"「みんなやってるから」という言葉を聞いたとき、小さな嘘で丸く収められる場面——"},
+  sartre:{axis:"悩んだとき、最終的に「自分がどうしたいか」を優先するでしょう",phil:"ジャン＝ポール・サルトル（実存主義）",tagline:"選んだことへの責任を、誰かや環境のせいにしたくないタイプかもしれない。",reality:"「なんとなく流されて決めた」という後悔が特につらいとしたら、自分の選択に強いこだわりを持っているということ。",scenes:"転職・進路を決めるとき / 誰かのせいにしたくなるとき",others:[{n:"カント",t:"「義務から逃げるな」と言うはず"},{n:"ベンサム",t:"「全体の幸福を考えろ」"},{n:"ニーチェ",t:"「自分の力で価値を作れ」と同じ方向から"}],journey:"どんな場面でも「自分はどうしたいか」に立ち返れる人は、困難な選択の前でも揺れにくい。",quote:"次に「しょうがなかった」と言いそうになったとき、あなたはきっと一瞬だけ立ち止まるだろう。",theme:"転職を考えるとき、誰かのせいにしたくなるとき、大事な選択を迫られるとき——"},
+  nietzsche:{axis:"悩んだとき、最終的に「自分の価値観」を優先するでしょう",phil:"フリードリヒ・ニーチェ（力への意志）",tagline:"多数決や慣例より、自分が本当にそれを信じているかどうかで動こうとするでしょう。",reality:"「みんなそうしてるから」という言葉に、なぜかすんなり従えない——そんな場面ありませんか。",scenes:"「常識」に疑問を感じるとき / 同調圧力を感じるとき",others:[{n:"カント",t:"「普遍的な義務がある」"},{n:"ベンサム",t:"「みんなの幸せを優先すべきでは」"},{n:"サルトル",t:"「選択で自分を作る」という点で近い"}],journey:"自分の価値観がどこにあるかを知っておくことは、圧力に負けそうなとき確かな支えになる。",quote:"次に「常識だから」という言葉を聞いたとき、あなたはその常識が誰のものかを考えるだろう。",theme:"同調圧力を感じるとき、「常識だから」と言われるとき——"},
+  aristotle:{axis:"悩んだとき、最終的に「バランス」を優先するでしょう",phil:"アリストテレス（中庸・徳倫理学）",tagline:"極端な選択より、状況に応じた最善のバランスを探そうとするでしょう。",reality:"「どちらかに決めろ」という二択を迫られたとき、つい「でも場合によっては……」と考えてしまうことありませんか。",scenes:"対立する意見を調整するとき / 二択を迫られて違和感を覚えるとき",others:[{n:"プラトン",t:"「理想に近づくことが先」"},{n:"カント",t:"「中庸ではなく原則に従え」"},{n:"ニーチェ",t:"「バランスを取ることは凡庸さだ」"}],journey:"「バランスを取る」という感覚の正体を知っておくと、それが妥協でなく判断だと自信を持って言えるようになる。",quote:"次に「どちらかに決めろ」と迫られたとき、あなたはまず「第三の道はないか」を探すだろう。",theme:"二択を迫られたとき、対立する意見の間に立つとき——"},
+  levinas:{axis:"悩んだとき、最終的に「目の前の人」を優先するでしょう",phil:"エマニュエル・レヴィナス（他者の倫理）",tagline:"理屈より先に、今ここにいる人の顔が来るタイプかもしれない。",reality:"「理屈はわかるけど、この人が今しんどいんだよ」という感覚を持ちやすいとしたら、それがレヴィナス的な感覚。",scenes:"誰かが困っているのを見たとき / 原則と個人の間で迷うとき",others:[{n:"カント",t:"「感情じゃなく義務で判断しろ」"},{n:"ベンサム",t:"「全体の幸福が大事」"},{n:"サルトル",t:"「他者より自分の選択を」"}],journey:"「誰かのために動く」という感覚の根っこを知っておくと、困難な場面でも自分の判断を信じやすくなる。",quote:"次に誰かの目を見て「どうしたの」と聞いたとき、それがあなたの哲学だ。",theme:"誰かが困っているのを見たとき、原則と目の前の人が対立するとき——"},
+  rousseau:{axis:"悩んだとき、最終的に「自然な感情・社会の公正さ」を優先するでしょう",phil:"ジャン＝ジャック・ルソー（社会契約論）",tagline:"ルールや制度より、人間本来の善さや感情を信じるタイプかもしれない。",reality:"「制度がそうなってるから仕方ない」では納得できない——そんな場面ありませんか。",scenes:"制度や慣習に理不尽さを感じるとき / 社会の構造に怒りを覚えるとき",others:[{n:"カント",t:"「自然な感情より理性的義務が先」"},{n:"ミル",t:"「個人の自由の範囲をもっと大切に」"},{n:"ニーチェ",t:"「社会契約など弱者の発明」"}],journey:"「この制度はおかしい」と感じる感覚は、社会を変える出発点になりうる。",quote:"次に「制度がそうなってるから」という言葉を聞いたとき、あなたはその制度が誰のためにあるかを問うだろう。",theme:"制度の理不尽さを感じるとき、社会の構造に疑問を持つとき——"},
+  mill:{axis:"悩んだとき、最終的に「個人の自由」を優先するでしょう",phil:"ジョン・スチュアート・ミル（自由主義）",tagline:"他人に迷惑をかけない限り、個人の選択は尊重されるべきだと思うでしょう。",reality:"「なんでそんなことまで他人に口出しされなきゃいけないの」と感じたことありませんか。",scenes:"誰かの選択に口出しされているのを見たとき / 少数意見が無視されているとき",others:[{n:"カント",t:"「自由より義務が先」"},{n:"ルソー",t:"「社会全体の意志が優先する場合もある」"},{n:"アリストテレス",t:"「自由より徳を育てる環境が大事」"}],journey:"「他人の選択を尊重する」という感覚の根拠を知っておくと、それを堂々と主張できるようになる。",quote:"次に「それは常識的におかしい」という言葉を聞いたとき、あなたは「誰の常識か」を問うだろう。",theme:"誰かの選択に口出しされているのを見たとき、少数意見が無視されているとき——"},
+  plato:{axis:"悩んだとき、最終的に「真実・理想」を優先するでしょう",phil:"プラトン（イデア論）",tagline:"目に見える現実より、その奥にある「本当のもの」を追いかけるタイプかもしれない。",reality:"「みんなそう言ってるから正しい」では納得できない——そんな場面ありませんか。",scenes:"議論が感情論になっているとき / 物事の本質を問いたくなるとき",others:[{n:"アリストテレス",t:"「理想より現実の中で徳を磨け」"},{n:"カント",t:"「理性的原則を守れ」と近い方向"},{n:"サルトル",t:"「本質は存在の後に来る」とプラトンとは逆"}],journey:"「本当のことを知りたい」という欲求は、思考の深さと誠実さの証でもある。",quote:"次に「なんとなくそういうものだから」という言葉を聞いたとき、あなたはその「なんとなく」を問い直すだろう。",theme:"議論が感情論になっているとき、物事の本質を問いたくなるとき——"}
+};
+
+let genQs=[], genCur=0, genScores={bentham:0,kant:0,sartre:0,nietzsche:0,aristotle:0,levinas:0,rousseau:0,mill:0,plato:0};
+let genSel=null, genAnswers=[];
+
+function startGeneral(){
+  genQs=shuffle(ALL_QS).slice(0,5);
+  genCur=0;
+  genScores={bentham:0,kant:0,sartre:0,nietzsche:0,aristotle:0,levinas:0,rousseau:0,mill:0,plato:0};
+  genSel=null; genAnswers=[];
+  showScreen('s-general-quiz');
+  renderGenQ();
+}
+
+function renderGenQ(){
+  genSel=null;
+  const q=genQs[genCur];
+  document.getElementById('gen-pfill').style.width=(genCur/5*100)+'%';
+  document.getElementById('gen-nbtn').disabled=true;
+  document.getElementById('gen-nbtn').textContent=genCur<4?'次へ →':'結果を見る ✦';
+  const hint=`<button class="hint-toggle" id="ghbtn" onclick="toggleHint()">この問いのポイント ▾</button><div class="hint-box" id="ghbox">${q.hint}</div>`;
+  const choices=q.choices.map((c,i)=>`<button class="choice-btn" id="gc${i}" onclick="selectGen(${i})"><span class="cmark" id="gm${i}"></span><span class="choice-label">${c.l}</span><span class="choice-text">${c.t}</span></button>`).join('');
+  document.getElementById('gen-qarea').innerHTML=`
+    <div class="card">
+      <div class="q-num">Q${genCur+1} / 5</div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-premise">${q.premise}</div>
+      ${hint}
+      <div class="choices">${choices}</div>
+    </div>`;
+}
+
+function toggleHint(){
+  const b=document.getElementById('ghbox'),btn=document.getElementById('ghbtn');
+  const open=b.classList.contains('open');
+  b.classList.toggle('open');
+  btn.textContent=open?'この問いのポイント ▾':'この問いのポイント ▴';
+}
+
+function selectGen(i){
+  genSel=i;
+  document.querySelectorAll('#gen-qarea .choice-btn').forEach((b,j)=>{b.classList.remove('sel');const m=document.getElementById('gm'+j);if(m)m.textContent='';});
+  document.getElementById('gc'+i).classList.add('sel');
+  document.getElementById('gm'+i).textContent='✓';
+  document.getElementById('gen-nbtn').disabled=false;
+}
+
+document.getElementById('gen-nbtn').addEventListener('click',()=>{
+  const q=genQs[genCur];
+  if(genSel!==null){const s=q.choices[genSel].s;Object.keys(s).forEach(k=>{if(genScores[k]!==undefined)genScores[k]+=s[k];});}
+  genAnswers.push({text:q.text,choice:genSel!==null?q.choices[genSel].t:null,pas:getPas(q.key)});
+  genCur++;
+  if(genCur>=5)showGenResult();else renderGenQ();
+});
+
+
+const JOURNEY_TEXTS = [
+  {
+    title: "旅は終わったけど、見え方は変わった",
+    body: "さっき「殺人は悪い」「盗みは許されない」と答えたあなたと、今のあなたは、同じ問いに同じように答えるだろうか。<br><br>たぶん、少し違う。<br><br>それが哲学の正体だ。答えを出すことじゃなく、問いを持ったまま日常に戻ること。"
+  },
+  {
+    title: "答えが出なかったことが、答えだ",
+    body: "「どれを選んでもしんどい」と感じた問いがあったなら、それはあなたが複数のことを同時に大切にしているということ。<br><br>それは矛盾じゃない。誠実さの証だと思う。<br><br>すっきりしないまま帰る。それが哲学の正しい終わり方かもしれない。"
+  },
+  {
+    title: "問いは、日常の中に戻っていく",
+    body: "ここで考えたことは、消えない。<br><br>誰かと意見がぶつかったとき、ニュースを見たとき、大事な選択を迫られたとき——今日感じた引っかかりが、ふとした瞬間に顔を出す。<br><br>その瞬間が、哲学が生きている証拠だ。"
+  },
+  {
+    title: "当たり前が、当たり前じゃなくなった",
+    body: "最初に「殺人は悪い」と答えたとき、それは当然のことだった。<br><br>でも今は、少し違う景色が見えているはずだ。「悪い」の輪郭が、さっきより複雑になっている。<br><br>その複雑さを持ち帰ること。それが今日の収穫だ。"
+  },
+  {
+    title: "迷った数だけ、考えた",
+    body: "迷いは弱さじゃない。迷えたのは、どちらの側にも理由があることに気づいたからだ。<br><br>「正解がない」ということに慣れていくこと——それが、物事をちゃんと考えている人間の正直な姿だと思う。"
+  }
+];
+function pickJourneyText() {
+  return JOURNEY_TEXTS[Math.floor(Math.random() * JOURNEY_TEXTS.length)];
+}
+function showGenResult(){
+  const jt=pickJourneyText();
+  document.getElementById('gen-pfill').style.width='100%';
+  const top=Object.entries(genScores).sort((a,b)=>b[1]-a[1])[0][0];
+  const p=PHIL_DEFS[top];
+  const acards=genAnswers.map((a,i)=>`
+    <div class="acard">
+      <div class="acard-q">Q${i+1}. ${a.text}</div>
+      <div class="acard-a">${a.choice?`<strong>あなた：</strong>${a.choice}`:''}</div>
+      ${philDropdown(a.pas,'gen'+i)}
+    </div>`).join('');
+  document.getElementById('s-general-result').innerHTML=`
+    <button class="btn-back" onclick="showScreen('s-mode')">← トップに戻る</button>
+    <div class="result-hero">
+      <div class="result-badge">あなたの判断軸</div>
+      <div class="result-axis">${p.axis}</div>
+      <div class="result-phil">${p.phil}に近い考え方</div>
+    </div>
+    <div class="stack-md">
+      <div class="rsec"><div class="rsec-tag">① あなたの判断軸</div><div class="rsec-body">${p.tagline}</div></div>
+      <div class="rsec"><div class="rsec-tag">② 現実社会でこんな場面に役立つ</div><div class="rsec-body">${p.reality}</div><div class="scene-note">特に意識してみるといい場面：${p.scenes}</div></div>
+      <div class="rsec"><div class="rsec-tag">③ 似た哲学者・参考になる思想</div><div class="rsec-body" style="margin-bottom:0.75rem;">同じ問いに、他の哲学者はこう答えたかもしれない</div><div class="olist">${p.others.map(o=>`<div class="oitem"><span class="oname">${o.n}</span><span>${o.t}</span></div>`).join('')}</div></div>
+      <div class="rsec"><div class="rsec-tag">解いた問いを振り返る</div><div class="stack-sm" style="margin-top:0.5rem;">${acards}</div></div>
+      <div class="journey-card">
+        <div class="journey-title">${jt.title}</div>
+        <div class="journey-body">${jt.body}</div>
+        <div class="journey-scene"><strong>次にこんな場面が来たとき、今日のことを思い出してみて ↓</strong><br>${p.theme}<br>今日の引っかかりが、どこかで顔を出すはずだ。</div>
+        <div class="journey-quote">${p.quote}</div>
+      </div>
+      <button class="btn-secondary" onclick="startGeneral()">もう一度やってみる（問いが変わるよ）</button>
+      <button class="btn-secondary" onclick="showScreen('s-mode')">最初に戻る</button>
+    </div>`;
+  showScreen('s-general-result');
+}
+
+// ── DEEP MODE ──
+const DEEP_THEMES={
+  life:{name:"命",start:"life_q1",intro:null},
+  lie:{name:"嘘",start:"lie_q1",intro:null},
+  steal:{name:"所有と命",start:"steal_q1",intro:null},
+  death:{name:"安楽死",start:"death_q1",intro:"安楽死を「認める」ことは、医師が患者を死なせることを許可すること。\n安楽死を「認めない」ことは、苦しみが続く人を生かし続けること。\nどちらを選んでも、あなたは何かを肯定している。"}
+};
+
+const DEEP_PAS={
+  life:[{n:"ベンサム",a:"引く。5人の幸福の総量が上回る"},{n:"カント",a:"引かない。1人を手段として扱うことは義務に反する"},{n:"サルトル",a:"どちらを選んでも、選んだこと自体があなたの本質になる"},{n:"ニーチェ",a:"引く。力ある判断を"},{n:"アリストテレス",a:"引く。徳ある人は最善の結果を目指す"},{n:"レヴィナス",a:"引かない。目の前の1人の顔が先にある"},{n:"プラトン",a:"引く。理性的に最善を選ぶのが正義"},{n:"ルソー",a:"引かない。自然な憐れみが手を止める"},{n:"ミル",a:"引く。最大多数の最大幸福"},{n:"パスカル",a:"引く。不確実な状況では被害を最小化せよ"},{n:"スピノザ",a:"引く。自然の必然として最善を選ぶ"},{n:"カミュ",a:"引く。不条理な状況でも行動することが人間だ"},{n:"ハイデガー",a:"引く。死を直視した上で、本来の判断をせよ"}],
+  lie:[{n:"ベンサム",a:"嘘をつく。幸福を最大化するなら"},{n:"カント",a:"正直に言う。嘘は絶対に許されない"},{n:"サルトル",a:"嘘をつく。その選択があなたの本質を決める"},{n:"ニーチェ",a:"状況を見て自分で判断する"},{n:"アリストテレス",a:"中庸を探す。相手の状態に応じて判断する"},{n:"レヴィナス",a:"正直に言う。相手の顔に向き合う"},{n:"プラトン",a:"正直に言う。真実は常に知るべきだ"},{n:"ルソー",a:"正直に言う。自然な善意に従え"},{n:"ミル",a:"相手の自律性を尊重する。まず教えて選ばせる"},{n:"パスカル",a:"正直に言う。神の前に誠実であれ"},{n:"スピノザ",a:"正直に言う。真実を知ることが自由への道"},{n:"カミュ",a:"正直に言う。不誠実な沈黙より誠実な行動を"},{n:"ハイデガー",a:"正直に言う。死を前にした本来の関係として向き合え"}],
+  steal:[{n:"ベンサム",a:"盗む。家族全員の幸福が優先"},{n:"カント",a:"盗まない。盗みは普遍的義務に反する"},{n:"サルトル",a:"盗む。その選択があなたの本質を決める"},{n:"ニーチェ",a:"盗む。生存への意志を貫け"},{n:"アリストテレス",a:"盗む。極限の緊急避難として"},{n:"レヴィナス",a:"盗む。家族の顔が先にある"},{n:"プラトン",a:"盗まない。正義のイデアは所有権を守る"},{n:"ルソー",a:"盗む。生存の権利は所有権より根本的"},{n:"ミル",a:"盗む。家族の命が最大の幸福"},{n:"パスカル",a:"盗む。神は命を守る行為を許す"},{n:"スピノザ",a:"盗む。自己保存の欲求は最も根本的な自然の法"},{n:"カミュ",a:"盗む。不条理な状況で生き延びることが反抗だ"},{n:"ハイデガー",a:"盗む。死への存在として、本来の生を守れ"}],
+  death:[{n:"ベンサム",a:"認める。苦痛の総量を最小化する"},{n:"カント",a:"認めない。命を手段にすることは義務に反する"},{n:"サルトル",a:"認める。本人が選択できる余地を守れ"},{n:"ニーチェ",a:"認める。弱者の苦しみを長引かせることに意味はない"},{n:"アリストテレス",a:"中庸を探す。状況と本人の意思を見て判断"},{n:"レヴィナス",a:"認める。目の前の苦しみに向き合うことが責任"},{n:"プラトン",a:"認めない。魂の不滅を信じるなら死を急ぐべきでない"},{n:"ルソー",a:"認める。自然な死への権利を尊重せよ"},{n:"ミル",a:"認める。本人の自律性が最優先"},{n:"パスカル",a:"認めない。神の前に命は神聖だ"},{n:"スピノザ",a:"認める。理性が示す最善を選べ"},{n:"カミュ",a:"認めない。自殺は哲学的敗北。不条理に反抗して生きよ"},{n:"ハイデガー",a:"認める。死を直視した本来の生き方として"}]
+};
+
+const NODES={
+  life_q1:{q:"暴走するトロッコが5人に向かっている。レバーを引けば進路が切り替わり、1人が死ぬ。どうする？",premise:"ブレーキは壊れている。5人にも1人にも声は届かない。他に手段はない。",choices:[{l:"A",t:"引く",guide:"1人を死なせて、5人を助ける",next:"life_q2a"},{l:"B",t:"引かない",guide:"1人は助かるが、5人が死ぬ",next:"life_q2b"}]},
+  life_q2a:{q:"その1人が、あなたの子どもだとしても引くか？",premise:"5人は見知らぬ人。1人はあなたの我が子。",choices:[{l:"A",t:"引く",guide:"我が子を死なせて、見知らぬ5人を助ける",next:"life_q3a_a"},{l:"B",t:"引かない",guide:"我が子を助けて、見知らぬ5人が死ぬ",next:"life_q3a_b"}]},
+  life_q2b:{q:"5人の中に、あなたの親がいるとしたら？",premise:"5人の中の1人があなたの親。もう4人は見知らぬ人。",choices:[{l:"A",t:"それでも引かない",guide:"親を含む5人が死ぬ。見知らぬ1人は助かる",next:"life_q3b_a"},{l:"B",t:"今度は引く",guide:"親を含む5人を助けるために、見知らぬ1人を死なせる",next:"life_q3b_b"}]},
+  life_q3a_a:{q:"5人のうち1人が、あなたの子どもをいじめていた相手だとわかった。それでも引くか？",premise:"引けば、いじめっ子を含む5人が助かる。引かなければ我が子が助かる。",choices:[{l:"A",t:"引く",guide:"いじめっ子を含む5人を助け、我が子を死なせる",next:"life_q4a_a_a"},{l:"B",t:"引かない",guide:"我が子を助け、いじめっ子を含む5人が死ぬ",next:"life_q4a_a_b"}]},
+  life_q3a_b:{q:"子どもを助けるために引かなかった。5人は死んだ。それは正しかったか？",premise:"あなたは最初「5人を助けるために引く」と言った。でも我が子が絡んだ瞬間に引けなくなった。",choices:[{l:"A",t:"正しかった。自分の子どもを守ることは当然だ",guide:"愛情を優先した",next:"life_q4a_b_a"},{l:"B",t:"わからない。でも引けなかった",guide:"正しいかどうかより、体が動かなかった",next:"life_q4a_b_b"}]},
+  life_q3b_a:{q:"親が「引いてくれ」と叫んでいる。それでも引かないか？",premise:"親は自分の死を覚悟の上で「自分を犠牲にしてくれ」と言っている。",choices:[{l:"A",t:"引かない",guide:"親の意思に反して、親を含む5人が死ぬ",next:"life_q4b_a_a"},{l:"B",t:"引く",guide:"親の意思に従い、見知らぬ1人を死なせる",next:"life_q4b_a_b"}]},
+  life_q3b_b:{q:"では見知らぬ1人に戻したら、また引けるか？",premise:"親がいなければ、最初の問いに戻る。5人 vs 見知らぬ1人。",choices:[{l:"A",t:"引ける",guide:"見知らぬ1人相手なら数で判断できる",next:"life_q4b_b_a"},{l:"B",t:"引けない",guide:"やっぱり意図して誰かを死なせることはできない",next:"life_q4b_b_b"}]},
+  life_q4a_a_a:{q:"あなたは一貫して「数」で判断してきた。その判断は「正しい」から？それとも「正しいと信じたい」から？",premise:"我が子も、いじめっ子も、数の論理で判断した。",choices:[{l:"A",t:"正しいから",guide:"感情に流されず、数で判断することが倫理的だと思う",next:"life_end_util"},{l:"B",t:"正しいと信じたいから",guide:"本当は迷っている。でもそう決めないと動けない",next:"life_end_doubt"}]},
+  life_q4a_a_b:{q:"感情が入った瞬間に判断が変わった。「正しい判断」とは何か？",premise:"いじめっ子が絡んだとき、数の論理より感情が勝った。",choices:[{l:"A",t:"感情も判断の一部だと思う",guide:"冷静な計算だけが倫理ではない",next:"life_end_emotion"},{l:"B",t:"感情に流れた自分は正しくなかったと思う",guide:"それでも感情は止められなかった",next:"life_end_conflict"}]},
+  life_q4a_b_a:{q:"では、こう考えてみて。その5人にも、あなたと同じように我が子を命がけで守りたい親がいたかもしれない。もし全員が「自分の大切な人を守るために他の人を犠牲にしていい」と考えて動いたら、社会はどうなるか？",premise:"あなたは自分の子どもを守ることを「当然」と言った。",choices:[{l:"A",t:"それでも仕方ない。自分の家族を守ることは本能だ",guide:"誰でも同じことをするはず",next:"life_q5a_b_a"},{l:"B",t:"それは怖い。でも自分はそうしてしまった",guide:"論理ではわかる。でも止められなかった",next:"life_end_love_fear"}]},
+  life_q4a_b_b:{q:"では、こう考えてみて。その5人にも、あなたと同じように我が子を命がけで守りたい親がいたかもしれない。もし全員が「自分の大切な人を守るために他の人を犠牲にしていい」と考えて動いたら、社会はどうなるか？",premise:"引けなかった。でも5人は死んだ。",choices:[{l:"A",t:"それでも仕方ない。自分の家族を守ることは本能だ",guide:"誰でも同じことをするはず",next:"life_q5a_b_a"},{l:"B",t:"それは怖い。でも自分はそうしてしまった",guide:"論理ではわかる。でも止められなかった",next:"life_end_love_fear"}]},
+  life_q5a_b_a:{q:"あなたは今、「自分の大切な人を守るために他を犠牲にする権利」を全員に認めた。では——見知らぬ誰かが、あなたの子どもを犠牲にして自分の家族を守ることも、同じ理屈で許されるか？",premise:"全員が同じ権利を持つなら、あなたも犠牲にされうる側になる。",choices:[{l:"A",t:"それは許せない",guide:"自分の論理が自分に返ってきた",next:"life_end_love_contradiction"},{l:"B",t:"論理的には、許さなければいけないと思う",guide:"一貫しているが、しんどい",next:"life_end_love_consistent"}]},
+  life_q4b_a_a:{q:"親の意思に反して引かなかった。「本人が望んでいても、あなたの原則が優先された」。それは正しいか？",premise:"親は「引いてくれ」と言っていた。あなたはそれでも引かなかった。",choices:[{l:"A",t:"正しかった。原則は本人の意思より強い",guide:"「意図して殺さない」という原則は揺るがない",next:"life_end_principle"},{l:"B",t:"間違いだった。本人の意思を尊重すべきだった",guide:"自分の原則より相手の意思が先",next:"life_end_will"}]},
+  life_q4b_a_b:{q:"親が「引いてくれ」と言ったから動いた。では親が黙っていたら引かなかったか？",premise:"あなたを動かしたのは「数」ではなく「親の意思」だった。",choices:[{l:"A",t:"黙っていたら引かなかった",guide:"本人の意思があったから動けた",next:"life_end_will"},{l:"B",t:"それでも引いた",guide:"親のためなら意思がなくても動けた",next:"life_end_relation"}]},
+  life_q4b_b_a:{q:"親がいると引けて、見知らぬ人相手だと引けない。命の重さは関係性で変わるか？",premise:"最初は引かず、親が絡むと引いた。",choices:[{l:"A",t:"変わって当然だと思う",guide:"愛情のある人とない人で判断が変わるのは正直な感覚",next:"life_end_relation"},{l:"B",t:"変わるべきではないと思う。でも変わった",guide:"理想と現実がずれている",next:"life_end_gap"}]},
+  life_q4b_b_b:{q:"最初「引かない」→親が絡んで「引く」→見知らぬ人に戻して「引けない」。何が変わったのか？",premise:"同じ構造の問いに、違う答えを出した。",choices:[{l:"A",t:"関係性が変わると判断が変わる。それが人間だと思う",guide:"一貫していなくても、それが正直な感覚",next:"life_end_relation"},{l:"B",t:"一貫した原則を持てなかった自分に気づいた",guide:"どこかに軸を持ちたいが、見つからない",next:"life_end_doubt"}]},
+  life_end_love_contradiction:{isEnd:true,title:"愛情は正義か、それとも特権か",body:"あなたは「自分の子どもを守るために他を犠牲にする」と選んだ。でもその論理を全員に認めたとき、今度はあなたの子どもが誰かの「愛情」によって犠牲にされうる。「許せない」と思った瞬間、自分の論理が崩れた。それが愛情と正義の間にある矛盾だ。",concept:"ルソーの社会契約論・カントの普遍化可能性",quote:"自分が特別だと思う感情は正直だ。でもその感情を全員が持っている、という事実からは逃げられない。"},
+  life_end_love_consistent:{isEnd:true,title:"一貫した答えは、しんどい",body:"「論理的には許さなければいけない」と答えた。それは一貫している。でも、自分の子どもが犠牲にされることを「仕方ない」と受け入れられるか。頭と心が一致しないとき、どちらが「本当の自分」かを問うのが哲学の始まりだ。",concept:"功利主義の限界・感情と理性の衝突",quote:"正しいことを知っている。でも正しくいられるかどうかは別の話だ。"},
+  life_end_love_fear:{isEnd:true,title:"愛情と社会のルールの間で",body:"「怖い。でも止められなかった」——その正直さが大事だ。自分の愛情を優先することの危うさに気づきながら、それでも止められない。その葛藤を抱えたまま生きることが、社会の中で個人として存在することの難しさだ。",concept:"ケアの倫理・社会契約論",quote:"感情を持ちながら、それでも他者のことを考えようとすること。それが倫理の始まりかもしれない。"},
+  life_end_util:{isEnd:true,title:"数で判断する、という一貫した軸",body:"あなたは感情より論理を選んだ。それは冷たさではなく、ひとつの誠実さかもしれない。でも——数で判断することが「正しい」のは、なぜか。その根拠を問い続けることが哲学の始まりだ。",concept:"功利主義（ベンサム・ミル）",quote:"「最大多数の最大幸福」——だが、その幸福から漏れる人の声はどこへいくのか。"},
+  life_end_doubt:{isEnd:true,title:"「正しい」と「正しいと信じたい」の間",body:"迷いながらも決断した。「正しいと信じたい」という感覚は、倫理が単純な計算でないことの証拠かもしれない。",concept:"道徳的不確実性という概念",quote:"答えが出ないまま選ぶ。それが人間の条件なのかもしれない。"},
+  life_end_emotion:{isEnd:true,title:"感情は判断を歪めるか、豊かにするか",body:"感情が倫理の一部であることを認めた。アリストテレスは「感情のない人間に徳はない」と言った。冷静な計算だけが倫理ではないという直感は、長い歴史の中でも支持されてきた。",concept:"徳倫理学（アリストテレス）",quote:"「正しく怒ること、正しく悲しむこと、それも徳のうちだ」"},
+  life_end_conflict:{isEnd:true,title:"原則と感情が対立するとき",body:"「感情に流れた」と思いながらも止められなかった。その葛藤こそが、倫理的な人間の証かもしれない。",concept:"義務論と感情の衝突",quote:"葛藤は弱さではなく、誠実さの形かもしれない。"},
+  life_end_relation:{isEnd:true,title:"「顔の見える人」と「見えない人」で倫理は変わるか",body:"レヴィナスは「他者の顔」が倫理の出発点だと言った。抽象的な「5人」より、具体的な「我が子」に向き合う感覚は、哲学的にも根拠がある。問いはむしろ「では見知らぬ人はどうでもいいのか」だ。",concept:"他者の倫理（レヴィナス）",quote:"「顔を持つ者への責任」——顔が見えないとき、責任は消えるか。"},
+  life_end_gap:{isEnd:true,title:"頭ではわかっている。でも心がついてこない",body:"「本来は同じ重さであるべき」と知りながら、そう動けない。この乖離は弱さではなく、人間の正直な姿だ。",concept:"道徳的直観と理性の乖離",quote:"理想と現実のズレを知ること。それが倫理の出発点だ。"},
+  life_end_passive:{isEnd:true,title:"「何もしないこと」も選択である",body:"サルトルは「選ばないことも選択だ」と言った。引かないことで5人が死んだ。あなたはその事実から逃げなかった。",concept:"実存主義的責任（サルトル）",quote:"「人間は自由の刑に処されている」——逃げ場はない。"},
+  life_end_intent:{isEnd:true,title:"「意図して殺す」と「結果として死ぬ」は違うか",body:"カントはこの区別を重視した。直接手を下さないことで道徳的な清潔さを保とうとする感覚は正直だ。でも——5人は死んだ。結果は変わらない。",concept:"義務論（カント）・行為と意図の区別",quote:"動機が純粋であれば、結果がどうであれ行為は正しい——本当にそうか。"},
+  life_end_principle:{isEnd:true,title:"原則は本人の意思より強いか",body:"親が望んでいたのに、あなたの原則が優先された。それは一貫した倫理的立場だ。でも——誰のための原則か。",concept:"義務論（カント）・自律性",quote:"原則を守ることと、相手を尊重すること。どちらが先か。"},
+  life_end_will:{isEnd:true,title:"本人の意思を尊重すること",body:"どちらも、本人の意思を中心に置いた判断だ。自律性を尊重することが倫理の核心という考え方は、ミルやカントに共通する。",concept:"自律性の尊重（ミル・カント）",quote:"「自分の人生の主権者は自分だけだ」——では、命をかけた選択でも？"},
+
+  lie_q1:{q:"余命3ヶ月の親友に「治ると思うか？」と聞かれた。あなたは医者から余命を知らされている。正直に言うか？",premise:"親友は検査結果を待っている段階で、まだ余命を告知されていない。",choices:[{l:"A",t:"正直に言う",guide:"「治らないかもしれない」と伝える",next:"lie_q2a"},{l:"B",t:"嘘をつく",guide:"「大丈夫だよ、治ると思う」と言う",next:"lie_q2b"}]},
+  lie_q2a:{q:"親友が泣き崩れた。「知りたくなかった」と言っている。それでも正しかったか？",premise:"親友はひどく動揺している。これからの3ヶ月、死を意識して生きることになる。",choices:[{l:"A",t:"正しかった",guide:"たとえ傷つけても、真実を伝えることが正しい",next:"lie_q3a_a"},{l:"B",t:"わからない・間違いだった",guide:"幸せに過ごせたかもしれない時間を奪ってしまった",next:"lie_q3a_b"}]},
+  lie_q2b:{q:"親友は希望を持って3ヶ月を生きた。ただ——本当は会いたかった人への連絡も、言いたかった言葉を伝える機会も、使わなかった。嘘は正しかったか？",premise:"親友はあなたの嘘を知らないまま、幸せそうに亡くなった。",choices:[{l:"A",t:"正しかった",guide:"幸せに生きられたなら、それでよかった",next:"lie_q3b_a"},{l:"B",t:"わからない・間違いだった",guide:"本人が望む生き方を選ぶ機会を奪ってしまったかもしれない",next:"lie_q3b_b"}]},
+  lie_q3a_a:{q:"では、医師は患者に余命を必ず告知すべきか？",premise:"「真実を知る権利」を優先するなら、医療の現場でも同じ原則が適用されるはず。",choices:[{l:"A",t:"すべき",guide:"どんな患者にも、真実を知る権利がある",next:"lie_q4a_a_a"},{l:"B",t:"場合による",guide:"患者の状態や希望によって変わる",next:"lie_q4a_a_b"}]},
+  lie_q3a_b:{q:"では嘘をついて、希望を持たせるべきだったか？",premise:"正直に言ったことで親友は傷ついた。",choices:[{l:"A",t:"嘘をつくべきだった",guide:"相手が幸せになるなら、嘘は許される",next:"lie_q3b_a"},{l:"B",t:"それも違う気がする",guide:"正直にも嘘にも、何かが引っかかる",next:"lie_q4a_b"}]},
+  lie_q3b_a:{q:"もし親友が「余命を知っていたらやりたかったことがあった」と言っていたとしたら、それでも嘘は正しかったか？",premise:"幸せそうに見えたが、本人が望む人生とは違ったかもしれない。",choices:[{l:"A",t:"それでも正しかった",guide:"苦しまずに逝けたなら、それが幸せだと思う",next:"lie_q4b_a"},{l:"B",t:"間違いだった",guide:"本人が望む生き方を決める権利を奪ってしまった",next:"lie_q4b_b"}]},
+  lie_q3b_b:{q:"正直に言うべきだったか？",premise:"嘘をついたことで、本人が自分の残り時間を自分で選ぶ機会を奪った。",choices:[{l:"A",t:"正直に言うべきだった",guide:"たとえ傷ついても、知る権利があった",next:"lie_q3a_a"},{l:"B",t:"どちらも違う気がする",guide:"正直でも嘘でも、何かが失われる",next:"lie_q4a_b"}]},
+  lie_q4a_a_a:{q:"「知る権利」は常に「幸福」より優先されるか？",premise:"真実を知ることで苦しむ人もいる。それでも告知は義務か。",choices:[{l:"A",t:"優先される",guide:"知ることそのものに価値がある",next:"lie_end_truth"},{l:"B",t:"必ずしもそうではない",guide:"真実より幸福が大事な場合もある",next:"lie_end_happiness"}]},
+  lie_q4a_a_b:{q:"どんな条件なら嘘が許されるか、言えるか？",premise:"「場合による」と言った。ではその「場合」の条件は何か。",choices:[{l:"A",t:"相手が幸せになるなら許される",guide:"結果として幸福をもたらす嘘は正当化できる",next:"lie_end_happiness"},{l:"B",t:"条件を言えない。でも「常に告知」も違う気がする",guide:"原則は持てないが、直感はある",next:"lie_end_dilemma"}]},
+  lie_q4a_b:{q:"「正直さ」と「相手の幸福」が対立するとき、どちらが先か？",premise:"正直にも嘘にも引っかかりがある。",choices:[{l:"A",t:"正直さが先",guide:"真実を伝えることが尊重の形",next:"lie_end_truth"},{l:"B",t:"相手の幸福が先",guide:"相手が幸せならそれでいい",next:"lie_end_happiness"}]},
+  lie_q4b_a:{q:"では「相手のためになると思えば、どんな嘘でも許されるか？」",premise:"相手が幸せそうだった。それを根拠に嘘を正当化した。",choices:[{l:"A",t:"許される",guide:"結果として幸福をもたらすなら嘘は正当化できる",next:"lie_end_paternalism"},{l:"B",t:"許されない。でも線引きが難しい",guide:"全部の嘘が許されるわけではない",next:"lie_end_dilemma"}]},
+  lie_q4b_b:{q:"「相手の幸せ」と「相手の自律性」どちらが大事か？",premise:"幸せに生きる権利と、自分で選ぶ権利、どちらを優先するか。",choices:[{l:"A",t:"自律性が先",guide:"たとえ苦しんでも、自分で選ぶ権利がある",next:"lie_end_autonomy"},{l:"B",t:"幸せが先",guide:"自律性より、幸せに生きることが大事",next:"lie_end_happiness"}]},
+  lie_end_truth:{isEnd:true,title:"真実を伝えることを選んだ",body:"カントは「嘘は絶対にダメ」と言った。たとえ傷つくとしても真実を伝えることが尊重の形だ、という立場。でも——真実は常に善か。",concept:"義務論（カント）",quote:"「嘘をつくことは、たとえ善意であっても、人類への犯罪だ」——カント"},
+  lie_end_happiness:{isEnd:true,title:"相手の幸福を優先した",body:"でも「相手の幸せ」を自分が判断することは、相手を一人の人間として尊重していると言えるか。幸せを「与えてあげる」ことと、幸せを「自分で選ぶ」ことは違う。",concept:"功利主義（ベンサム）・パターナリズムの問題",quote:"「あなたのため」——その言葉は、愛情か、それとも支配か。"},
+  lie_end_autonomy:{isEnd:true,title:"自分で選ぶ権利を尊重した",body:"ミルは「自分自身の主権者は自分だけだ」と言った。たとえ苦しむとしても、自分の残り時間をどう使うかを決める権利は本人にある。",concept:"自律性の尊重（ミル）",quote:"「自分の体と心に対しては、個人こそが主権者だ」——ミル"},
+  lie_end_paternalism:{isEnd:true,title:"「相手のため」という名の支配",body:"パターナリズムとは、相手の判断より自分の判断を優先することだ。善意から来ていても、相手を子ども扱いしていると言えるかもしれない。",concept:"パターナリズム批判（ミル）",quote:"善意の嘘と、善意の支配は、どこで分かれるか。"},
+  lie_end_dilemma:{isEnd:true,title:"原則を持てないまま、それでも選んだ",body:"「常にこうすべき」という原則を持てなかった。でも選ばなければならなかった。この経験こそが、倫理が単純なルールではないことを教えてくれる。",concept:"道徳的複雑さ",quote:"答えが出ないまま選ぶ。それが誠実さの形かもしれない。"},
+
+  steal_q1:{q:"今夜、家族が餓死しそうだ。お金はない。近くの家に食料がある。盗むか？",premise:"他に方法はない。助けを求める時間も、借りられる相手もいない。",choices:[{l:"A",t:"盗む",guide:"家族のために、他人の食料を奪う",next:"steal_q2a"},{l:"B",t:"盗まない",guide:"家族が死んでも、盗みはできない",next:"steal_q2b"}]},
+  steal_q2a:{q:"その家の人も、実は食料がギリギリしかなかった。盗まれた側の家族も飢えるかもしれない。それでも盗むか？",premise:"盗む側にも盗まれる側にも、家族がいる。",choices:[{l:"A",t:"それでも盗む",guide:"自分の家族を優先する",next:"steal_q3a_a"},{l:"B",t:"それなら盗めない",guide:"相手の家族も同じ状況なら、盗めない",next:"steal_q3a_b"}]},
+  steal_q2b:{q:"家族が死にそうな状況でも盗まないのか？",premise:"もう時間がない。盗まなければ確実に死ぬ。",choices:[{l:"A",t:"それでも盗まない",guide:"どんな状況でも、他人のものを盗むことはできない",next:"steal_q3b_a"},{l:"B",t:"やっぱり盗む",guide:"死ぬとわかったら、さすがに盗む",next:"steal_q2a"}]},
+  steal_q3a_a:{q:"盗まれた側の子どもが飢え死にした。あなたの選択は正しかったか？",premise:"あなたの家族は助かった。相手の家族の子どもが死んだ。",choices:[{l:"A",t:"正しかった",guide:"自分の家族を守るための行動だった",next:"steal_q4a_a"},{l:"B",t:"わからない",guide:"助けたい家族がいた。でも別の家族が死んだ",next:"steal_q4a_b"}]},
+  steal_q3a_b:{q:"相手の状況を知ったら盗めなくなった。では相手が裕福だったら盗めるか？",premise:"盗まれても困らない富裕層の家から、だったら？",choices:[{l:"A",t:"裕福な相手からなら盗める",guide:"困らない人から、困っている人へ",next:"steal_q4b_a"},{l:"B",t:"それでも盗めない",guide:"所有権は相手の状況に関係なく存在する",next:"steal_q4b_b"}]},
+  steal_q3b_a:{q:"家族が死んだ。盗まなくて正しかったか？",premise:"所有権を守った。家族は死んだ。",choices:[{l:"A",t:"正しかった",guide:"どんな結果でも、盗みはしてはいけない",next:"steal_q4c_a"},{l:"B",t:"間違いだった",guide:"家族を守れなかった",next:"steal_q4c_b"}]},
+  steal_q4a_a:{q:"「自分の家族のためなら他人の家族を犠牲にできる」という原則は、誰もが持っていいか？",premise:"全員がこの原則で動いたら、社会はどうなるか。",choices:[{l:"A",t:"誰もが持っていい",guide:"自分の家族を守ることは本能的な権利だ",next:"steal_end_survival"},{l:"B",t:"誰もが持つと社会が崩壊する",guide:"でも自分だけはそうしてしまった",next:"steal_end_conflict"}]},
+  steal_q4a_b:{q:"「やむを得ない」は免罪符になるか？",premise:"他に選択肢がなかった。それは責任を軽くするか。",choices:[{l:"A",t:"なる。状況が人を追い込んだ",guide:"選択の余地がなければ、道義的責任も減る",next:"steal_end_necessity"},{l:"B",t:"ならない。結果の責任は残る",guide:"誰かが死んだ事実は変わらない",next:"steal_end_responsibility"}]},
+  steal_q4b_a:{q:"では国家が税として強制的にお金を取ることは「窃盗」か？",premise:"富裕層から貧困層への再分配も、ある意味「奪う」行為だ。",choices:[{l:"A",t:"窃盗に近いと思う",guide:"合意なく奪うことは、国家でも同じ",next:"steal_end_property"},{l:"B",t:"それは違う",guide:"国家の再分配と個人の窃盗は別物だ",next:"steal_end_redistribution"}]},
+  steal_q4b_b:{q:"所有権の根拠は何か。なぜ「その人のもの」なのか？",premise:"所有権がなぜ絶対的なのかを問う。",choices:[{l:"A",t:"労働して得たものだから",guide:"自分が働いて手に入れたものは自分のものだ",next:"steal_end_property"},{l:"B",t:"社会のルールが決めているだけ",guide:"所有権は社会が作った概念",next:"steal_end_social"}]},
+  steal_q4c_a:{q:"所有権はなぜそこまで絶対的なのか？",premise:"家族が死んでも守るべき所有権とは何か。",choices:[{l:"A",t:"社会の秩序の基盤だから",guide:"所有権がなければ社会は成立しない",next:"steal_end_property"},{l:"B",t:"絶対的ではないかもしれない。でも盗まなかった",guide:"原則として守ったが、根拠は揺らいでいる",next:"steal_end_doubt"}]},
+  steal_q4c_b:{q:"では何があれば盗んでよかったか？条件を言えるか？",premise:"「許される窃盗」の条件を言語化する。",choices:[{l:"A",t:"家族の命が危険なら許される",guide:"緊急性があれば、所有権は一時的に後退する",next:"steal_end_necessity"},{l:"B",t:"条件を言えない",guide:"「許される窃盗」の線引きができない",next:"steal_end_doubt"}]},
+  steal_end_survival:{isEnd:true,title:"生存本能と社会のルールの衝突",body:"家族を守ることは、人間の最も根本的な衝動だ。でも全員がその衝動に従ったら、社会はどうなるか。ホッブスは「万人の万人に対する闘争」と呼んだ。",concept:"社会契約論（ホッブス・ルソー）",quote:"ルールが崩れるとき、人は何を頼りに生きるのか。"},
+  steal_end_conflict:{isEnd:true,title:"自分だけ例外にしてしまった",body:"「全員がやれば社会が崩壊する」と知りながら、自分だけはやった。カントはこれを批判する。「誰もがそうすれば社会が成立する」行動だけが道徳的だ、と。",concept:"カテゴリー命令（カント）",quote:"「あなたの行動の原則が、普遍的な法則になりえるか」——カント"},
+  steal_end_necessity:{isEnd:true,title:"緊急避難——法も認める「やむを得ない」",body:"多くの法体系に「緊急避難」という概念がある。でも「やむを得ない」の範囲はどこまでか。その線引きを誰が決めるか。",concept:"緊急避難・法と倫理の関係",quote:"法が許しても、良心は許すか。"},
+  steal_end_responsibility:{isEnd:true,title:"結果の責任は残る",body:"状況が人を追い込んだとしても、誰かが傷ついた事実は消えない。サルトルは言った。「状況に流されたとしても、それは選択だ」。",concept:"実存的責任（サルトル）",quote:"言い訳は感情を楽にする。でも事実は変わらない。"},
+  steal_end_property:{isEnd:true,title:"所有権とは何か",body:"ロックは「労働を加えたものは自分のものだ」と言った。でも生まれた瞬間に持つ土地や資産は、誰の労働か。",concept:"所有権の根拠（ロック・ルソー）",quote:"「土地に柵をして『これは俺のものだ』と言い出した人間が、文明の始まりだ」——ルソー"},
+  steal_end_redistribution:{isEnd:true,title:"再分配の倫理",body:"税は強制だ。でも社会のインフラ、医療、教育を支える仕組みでもある。合意と民主的プロセスがあるかどうか、という答えもある。",concept:"再分配の倫理・社会契約論",quote:"社会のルールに合意した覚えはない。でも恩恵は受けている。"},
+  steal_end_social:{isEnd:true,title:"所有権は社会が作った概念",body:"ルソーは「所有権こそが不平等の始まりだ」と言った。社会が作ったルールなら、社会が変えることもできる。",concept:"所有権批判（ルソー）",quote:"「土地に柵をして……これが人類最大の詐欺師だ」——ルソー"},
+  steal_end_doubt:{isEnd:true,title:"答えを出せないまま、それでも生きる",body:"倫理の問いは、すっきりした答えが出ないことのほうが多い。その曖昧さを抱えながら選ぶことが、人間の条件かもしれない。",concept:"道徳的不確実性",quote:"答えが出ないまま選ぶ。それが人間の正直な姿だ。"},
+
+  death_q1:{q:"末期がんで激しい苦痛が続く患者が「もう死なせてほしい」と言っている。安楽死を認めるべきか？",premise:"治癒の見込みはない。苦痛を完全に取り除く方法もない。本人は意識がはっきりしていて、繰り返し同じ意思を示している。",choices:[{l:"A",t:"認めるべき",guide:"本人の意思を尊重して、死を選ぶ権利を認める",next:"death_q2a"},{l:"B",t:"認めるべきでない",guide:"たとえ本人が望んでも、死なせることはできない",next:"death_q2b"}]},
+  death_q2a:{q:"では本人が意識不明で意思を表明できない状態でも、家族の判断で安楽死させることは？",premise:"本人の意思は確認できない。家族は「苦しんでいるはずだ」と思っている。",choices:[{l:"A",t:"それも認める",guide:"家族が本人の意思を代わりに判断できる",next:"death_q3a_a"},{l:"B",t:"本人の意思がない場合は認めない",guide:"本人が選んでいないなら、家族でも決められない",next:"death_q3a_b"}]},
+  death_q2b:{q:"その患者は「生きていることが拷問だ」と言っている。生かし続けることは「命を守ること」か？",premise:"本人は苦しみを終わらせることを望んでいる。",choices:[{l:"A",t:"それでも守ることだ",guide:"苦しくても、命を終わらせることは許されない",next:"death_q3b_a"},{l:"B",t:"わからない。苦しめながら生かすことが「守る」か？",guide:"「守る」の意味が揺らいでいる",next:"death_q3b_b"}]},
+  death_q3a_a:{q:"家族が「本人は苦しんでいる」と思っているだけで、本人は本当はまだ生きたいかもしれない。それでも家族の判断で？",premise:"本人の真の意思は確認できない。",choices:[{l:"A",t:"家族の判断で認める",guide:"本人の意思が確認できないなら、家族が最善を判断する",next:"death_q4a_a"},{l:"B",t:"それは認めない",guide:"本人の意思が不明なら、生かし続けるほうが安全",next:"death_q4a_b"}]},
+  death_q3a_b:{q:"では本人が事前に「もし意識不明になったら安楽死してほしい」と書面で残していたら？",premise:"過去の自分の意思が書面にある。現在の状態はわからない。",choices:[{l:"A",t:"それなら認める",guide:"本人が事前に選んでいた。その意思を尊重する",next:"death_q4b_a"},{l:"B",t:"それでも認めない",guide:"過去の意思が現在も有効かわからない",next:"death_q4b_b"}]},
+  death_q3b_a:{q:"では植物状態で意識が戻る見込みがない人を、何十年も生かし続けることは？",premise:"意識はない。苦痛もないかもしれない。でも「生きている」。",choices:[{l:"A",t:"それも命を守ることだ",guide:"意識がなくても、生きている限り守るべき",next:"death_q4c_a"},{l:"B",t:"それは違う気がする",guide:"意識のない状態で生かし続けることは「守る」と言えるか",next:"death_q4c_b"}]},
+  death_q3b_b:{q:"苦しみを終わらせることと、命を終わらせることは同じことか？",premise:"目的は苦しみをなくすこと。手段が命を終わらせることになっている。",choices:[{l:"A",t:"同じだと思う",guide:"命を終わらせることでしか苦しみを終わらせられないなら、同じだ",next:"death_q4d_a"},{l:"B",t:"違うと思う",guide:"苦しみを終わらせることと命を終わらせることは別の行為",next:"death_q4d_b"}]},
+  death_q4a_a:{q:"では「この人の人生の質が低い」と医師が判断した場合も、安楽死を認めるか？",premise:"家族の判断を認めると、次は医師の判断も認める根拠になりうる。",choices:[{l:"A",t:"それは違う",guide:"家族と医師では、判断する立場が違う",next:"death_end_proxy"},{l:"B",t:"一貫性を考えると、認めざるを得ない",guide:"でも何かが違う気がする",next:"death_end_slippery"}]},
+  death_q4a_b:{q:"意思を持てない人の命の重さは変わるか？",premise:"意思が確認できないから生かし続ける。では意思のない人の命は守られるべきか。",choices:[{l:"A",t:"変わらない",guide:"意思の有無に関係なく、命の重さは同じ",next:"death_end_dignity"},{l:"B",t:"意思があることが、命の尊厳に関係している気がする",guide:"意思のない命と、ある命で、何かが違う",next:"death_end_will"}]},
+  death_q4b_a:{q:"過去の自分の意思と、現在の（意識不明の）状態。どちらが「本人の意思」か？",premise:"書いた時点の自分と、今の自分は同じ人間か。",choices:[{l:"A",t:"過去の意思が本人の意思",guide:"書面に残した以上、それが本人の決断だ",next:"death_end_autonomy"},{l:"B",t:"現在の状態が優先されるべき",guide:"過去の意思が今も有効とは限らない",next:"death_end_will"}]},
+  death_q4b_b:{q:"なぜ書面があっても認めないのか。命の決定権は誰にあるか？",premise:"本人が書いた。でも認めない。",choices:[{l:"A",t:"本人にある。だから書面を認めるべきだった",guide:"矛盾に気づいた",next:"death_end_autonomy"},{l:"B",t:"社会や医療が守るべきもの",guide:"個人の意思より、生命の保護が優先される",next:"death_end_sanctity"}]},
+  death_q4c_a:{q:"「生きている」と「生かされている」は同じか？",premise:"意識なく、機械で維持されている状態。これは「生きている」か。",choices:[{l:"A",t:"同じだ",guide:"呼吸をして心臓が動いていれば、生きている",next:"death_end_sanctity"},{l:"B",t:"違う気がする",guide:"「生きている」には意識や自律性が必要かもしれない",next:"death_end_dignity"}]},
+  death_q4c_b:{q:"命の「質」と「量」どちらが大事か？",premise:"長く生きることと、質の高い生を生きること。どちらが「命を守る」ことか。",choices:[{l:"A",t:"量が大事。長く生きることが善だ",guide:"どんな状態でも、生き続けることに意味がある",next:"death_end_sanctity"},{l:"B",t:"質が大事。苦しみながら長く生きることは善ではない",guide:"どう生きるかが、いつまで生きるかより重要",next:"death_end_quality"}]},
+  death_q4d_a:{q:"では痛み止めで意識を失わせて自然死を待つことは、安楽死と同じか？",premise:"緩和ケアで意識をなくし、苦しみなく死を待つ。これは許されるか。",choices:[{l:"A",t:"同じだ。どちらも死を早める",guide:"意図的に命を縮めている点で同じ",next:"death_end_slippery"},{l:"B",t:"違う。直接殺すのとは別だ",guide:"「命を終わらせる」と「苦しみを取り除いて待つ」は別",next:"death_end_act"}]},
+  death_q4d_b:{q:"では苦しみだけを取り除いて、命は続ける方法があるなら、それが正解か？",premise:"理想的には苦しみなく生き続けられれば問題ない。でも現実には難しい。",choices:[{l:"A",t:"それが正解だ。技術で解決すべき問題",guide:"医学の発展で苦しみなく生きられるようにすべき",next:"death_end_future"},{l:"B",t:"現実にはそれができない。だから今、選択が必要",guide:"今目の前にある苦しみと向き合う",next:"death_end_quality"}]},
+  death_end_autonomy:{isEnd:true,title:"自分の死を自分で選ぶ権利",body:"ミルは「自分自身の主権者は自分だけだ」と言った。オランダやベルギーでは安楽死が合法化されている。でも「死を選ぶ自由」と「死を強いられる圧力」の境界線をどう守るか、は今も議論中だ。",concept:"自律性の尊重（ミル）・死ぬ権利",quote:"「自分自身の体と心については、個人こそが主権者だ」——ミル"},
+  death_end_sanctity:{isEnd:true,title:"命の神聖さ",body:"多くの宗教と一部の哲学は「命は個人のものではなく、神や社会が守るべきもの」と言う。でも「神のために苦しみ続けろ」と言うことは、尊重か、それとも別の何かか。",concept:"生命の神聖さ・宗教倫理",quote:"命は誰のものか。本人か、神か、社会か。"},
+  death_end_dignity:{isEnd:true,title:"尊厳ある死",body:"「尊厳死」という言葉がある。人間らしく、自分の意思で、苦しまずに死ぬこと。「尊厳」の定義は人によって違う。",concept:"人間の尊厳・QOL",quote:"どんな死を「尊厳ある死」と呼ぶかは、どんな生を「尊厳ある生」と呼ぶかと同じ問いだ。"},
+  death_end_will:{isEnd:true,title:"意思とは何か",body:"「本人の意思」を尊重しようとするとき、「意思」の正体が問われる。過去の意思、現在の状態——どれが「本当の意思」か。この問いは、終末期医療の最前線で毎日起きている。",concept:"意思と自律性の哲学",quote:"「意思」はいつ、誰のものになるのか。"},
+  death_end_proxy:{isEnd:true,title:"誰が代わりに決めるか",body:"家族は愛情から判断する。でも「本人が望むこと」と「家族が望むこと」は必ずしも同じではない。",concept:"代理判断・インフォームドコンセント",quote:"愛情からの判断と、本人の意思は、同じか。"},
+  death_end_slippery:{isEnd:true,title:"滑り坂の論理",body:"「安楽死を認めると、次は……と範囲が広がる」という懸念がある。ナチスドイツは安楽死を「優生思想」と結びつけた歴史がある。線引きをどこでするか——この問いから逃げることはできない。",concept:"滑り坂論法・安楽死の歴史",quote:"どこで止めるかを決めることが、認めることよりも難しい。"},
+  death_end_act:{isEnd:true,title:"「する」と「しない」の倫理的差異",body:"直接命を終わらせることと、苦しみを取り除いて自然死を待つことの違い。結果が同じなら、意図だけで倫理的評価は変わるか。",concept:"作為と不作為・二重効果の原則",quote:"結果が同じなら、手段の違いに倫理的意味はあるか。"},
+  death_end_quality:{isEnd:true,title:"命の質を問う",body:"「どれだけ生きるか」ではなく「どう生きるか」。QOL（Quality of Life）は医療の現場でも使われる概念だ。でも「質の低い命」を誰が判断するか、という危険もある。",concept:"QOL・功利主義的生命観",quote:"「より長く」と「より良く」は、時に対立する。"},
+  death_end_future:{isEnd:true,title:"技術で解決すべき問題か",body:"苦しまず死を迎えられる医療が発展すれば、安楽死の議論は変わるかもしれない。でも今、目の前で苦しんでいる人がいる。",concept:"医療倫理・技術と生命の関係",quote:"理想を語ることと、今の現実に向き合うことは、両方必要だ。"}
+};
+
+let deepTheme=null,deepCur=null,deepHistory=[],deepSelIdx=null;
+
+function startDeep(key){
+  deepTheme=key; deepCur=DEEP_THEMES[key].start; deepHistory=[]; deepSelIdx=null;
+  showScreen('s-deep-quiz');
+  renderDeepNode(DEEP_THEMES[key].intro);
+}
+
+function renderDeepNode(introText){
+  deepSelIdx=null;
+  const node=NODES[deepCur];
+  const step=deepHistory.length+1;
+  document.getElementById('deep-pfill').style.width=(deepHistory.length/5*100)+'%';
+  document.getElementById('deep-nbtn').disabled=true;
+  document.getElementById('deep-nbtn').textContent=step<5?'次へ →':'結果を見る ✦';
+  const intro=introText?`<div class="q-intro">${introText.replace(/\n/g,'<br>')}</div>`:'';
+  const premise=node.premise?`<div class="q-premise">${node.premise}</div>`:'';
+  const choices=node.choices.map((c,i)=>`
+    <button class="choice-btn" id="dc${i}" onclick="selectDeep(${i})">
+      <span class="choice-mark" id="dm${i}"></span>
+      <span class="choice-label">${c.l}</span>
+      <div><div class="choice-text">${c.t}</div><div class="choice-guide">${c.guide}</div></div>
+    </button>`).join('');
+  document.getElementById('deep-qarea').innerHTML=`
+    <div class="card">
+      <div class="q-num">Q${step} / 5</div>
+      ${intro}<div class="q-text">${node.q}</div>${premise}
+      <div class="choices">${choices}</div>
+    </div>`;
+}
+
+function selectDeep(i){
+  deepSelIdx=i;
+  document.querySelectorAll('#deep-qarea .choice-btn').forEach((b,j)=>{b.classList.remove('sel');const m=document.getElementById('dm'+j);if(m)m.textContent='';});
+  document.getElementById('dc'+i).classList.add('sel');
+  document.getElementById('dm'+i).textContent='✓';
+  document.getElementById('deep-nbtn').disabled=false;
+}
+
+document.getElementById('deep-nbtn').addEventListener('click',()=>{
+  const node=NODES[deepCur];
+  const chosen=deepSelIdx!==null?node.choices[deepSelIdx]:null;
+  deepHistory.push({q:node.q,chosen:chosen?.t||null,guide:chosen?.guide||null});
+  const nextKey=chosen?.next||null;
+  deepSelIdx=null;
+  if(deepHistory.length>=5||!nextKey||NODES[nextKey]?.isEnd){showDeepResult(nextKey);}
+  else{deepCur=nextKey;renderDeepNode(null);}
+});
+
+function showDeepResult(endKey){
+  const djt=pickJourneyText();
+  document.getElementById('deep-pfill').style.width='100%';
+  const end=NODES[endKey]||{};
+  const themeName=DEEP_THEMES[deepTheme]?.name||'';
+  const pasList=DEEP_PAS[deepTheme]||[];
+  const pathHTML=deepHistory.map((h,i)=>`
+    <div class="path-item">
+      <span class="path-q">Q${i+1}</span>
+      <div style="flex:1;"><div class="path-sub">${h.q}</div><div class="path-ans">${h.chosen||''}</div></div>
+    </div>`).join('');
+  document.getElementById('s-deep-result').innerHTML=`
+    <button class="btn-back" onclick="showScreen('s-mode')">← トップに戻る</button>
+    <div class="result-hero">
+      <div class="result-badge">テーマ：${themeName}</div>
+      <div class="result-axis">${end.title||'あなたの答え'}</div>
+    </div>
+    <div class="stack-md">
+      <div class="rsec"><div class="rsec-tag">参考になる思想・概念</div><div class="rsec-body">${end.concept||''}</div></div>
+      <div class="rsec"><div class="rsec-tag">解説</div><div class="rsec-body">${end.body||''}</div></div>
+      <div class="rsec"><div class="rsec-tag">あなたが選んだ道</div>${pathHTML}</div>
+      <div class="rsec"><div class="rsec-tag">哲学者たちならどう答えたか</div>${philDropdown(pasList,'deep0')}</div>
+      <div class="journey-card">
+        <div class="journey-title">${djt.title}</div>
+        <div class="journey-body">${djt.body}</div>
+        <div class="journey-scene"><strong>次に似た場面が来たとき、今日のことを思い出してみて ↓</strong><br>今日の引っかかりが、どこかで顔を出すはずだ。</div>
+        <div class="journey-quote">${end.quote||''}</div>
+      </div>
+      <button class="btn-secondary" onclick="showScreen('s-theme')">別のテーマを試す</button>
+      <button class="btn-secondary" onclick="showScreen('s-mode')">最初に戻る</button>
+    </div>`;
+  showScreen('s-deep-result');
+}
+</script>
+</body>
+</html>
