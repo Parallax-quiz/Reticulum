@@ -640,6 +640,10 @@
         <div class="mode-card-title">全般モード</div>
         <div class="mode-card-desc">様々なテーマからランダムに5問。幅広く考えたい人向け。</div>
       </button>
+      <button class="mode-card" onclick="showScreen('s-phil-select')">
+        <div class="mode-card-title">哲学者からの問題</div>
+        <div class="mode-card-desc">一人の哲学者の思想を、問いとともに追う。答えではなく、見方が変わる。</div>
+      </button>
     </div>
   </div>
 
@@ -678,6 +682,10 @@
         <div class="mode-card-title">安楽死</div>
         <div class="mode-card-desc">認めることも、認めないことも、何かを肯定している</div>
       </button>
+      <button class="mode-card" onclick="startDeep('war')">
+        <div class="mode-card-title">正戦論</div>
+        <div class="mode-card-desc">人道的介入は正義か。誰が戦争の「正しさ」を決めるのか</div>
+      </button>
     </div>
   </div>
 
@@ -706,6 +714,33 @@
 
   <!-- GENERAL RESULT -->
   <div id="s-general-result" class="screen"></div>
+
+  <!-- PHIL SELECT -->
+  <div id="s-phil-select" class="screen">
+    <button class="btn-back" onclick="showScreen('s-mode')">← 戻る</button>
+    <div class="eyebrow">哲学者からの問題</div>
+    <h2 class="title-md" style="margin-bottom: 0.4rem;">哲学者を選んで</h2>
+    <p class="sub-text" style="margin-bottom: 1.5rem;">一人の哲学者の問いを追いながら、その思想の核心へ。</p>
+    <div class="stack-sm">
+      <button class="mode-card" onclick="startPhil('nietzsche')">
+        <div class="mode-card-title">ニーチェ</div>
+        <div class="mode-card-desc">道徳の起源を疑い、神の死を宣告し、超人を描いた哲学者。あなたの「善悪」はどこから来ているか</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- PHIL JOURNEY -->
+  <div id="s-phil-journey" class="screen">
+    <button class="btn-back" onclick="showScreen('s-phil-select')">← 戻る</button>
+    <div class="progress-track"><div class="progress-fill" id="phil-pfill" style="width:0%"></div></div>
+    <div id="phil-area"></div>
+    <div class="nav-row">
+      <button class="btn-primary" id="phil-nbtn" disabled>次へ →</button>
+    </div>
+  </div>
+
+  <!-- PHIL RESULT -->
+  <div id="s-phil-result" class="screen"></div>
 
 </div>
 
@@ -1028,7 +1063,8 @@ const DEEP_THEMES={
   life:{name:"命",start:"life_q1",intro:"誰かを助けると、別の誰かが死ぬ。選ばなければならないとき、あなたは何を根拠に動くか。"},
   lie:{name:"嘘",start:"lie_q1",intro:"善意から出た嘘は、相手を守るか——それとも、相手が選ぶ権利を奪うか。"},
   steal:{name:"所有と命",start:"steal_q1",intro:"命を守るために、誰かのものを奪うことは許されるか。「やむを得ない」は、どこまで何を正当化するのか。"},
-  death:{name:"安楽死",start:"death_q1",intro:"安楽死を「認める」ことは、医師が患者を死なせることを許可すること。\n安楽死を「認めない」ことは、苦しみが続く人を生かし続けること。\nどちらを選んでも、あなたは何かを肯定している。"}
+  death:{name:"安楽死",start:"death_q1",intro:"安楽死を「認める」ことは、医師が患者を死なせることを許可すること。\n安楽死を「認めない」ことは、苦しみが続く人を生かし続けること。\nどちらを選んでも、あなたは何かを肯定している。"},
+  war:{name:"正戦論",start:"war_q1",intro:"隣国が自国民を虐殺している。止める力はある。でも攻撃はされていない。介入は正義か、それとも侵略か——誰が戦争の「正しさ」を決めるのか。"}
 };
 
 const DEEP_PAS={
@@ -1038,7 +1074,8 @@ const DEEP_PAS={
   death:[{n:"ベンサム",a:"認める。苦痛の総量を最小化する"},{n:"カント",a:"認めない。命を手段にすることは義務に反する"},{n:"サルトル",a:"認める。本人が選択できる余地を守れ"},{n:"ニーチェ",a:"認める。弱者の苦しみを長引かせることに意味はない"},{n:"アリストテレス",a:"中庸を探す。状況と本人の意思を見て判断"},{n:"レヴィナス",a:"認める。目の前の苦しみに向き合うことが責任"},{n:"プラトン",a:"認めない。魂の不滅を信じるなら死を急ぐべきでない"},{n:"ルソー",a:"認める。自然な死への権利を尊重せよ"},{n:"ミル",a:"認める。本人の自律性が最優先"},{n:"パスカル",a:"認めない。神の前に命は神聖だ"},{n:"スピノザ",a:"認める。理性が示す最善を選べ"},{n:"カミュ",a:"認めない。自殺は哲学的敗北。不条理に反抗して生きよ"},{n:"ハイデガー",a:"認める。死を直視した本来の生き方として"}],
   organ:[{n:"ベンサム",a:"市場を作るべきだ。臓器不足で死ぬ人がいる以上、供給を増やすことが幸福の最大化になる"},{n:"カント",a:"認めない。人体を市場に出すことは、人格を単なる手段として扱うことだ"},{n:"ミル",a:"自律性が保証されるなら許される。ただし「真に選べる状況」があることが前提だ"},{n:"ルソー",a:"問題は市場でなく社会の不平等だ。売らざるを得ない状況を生み出した社会構造を疑え"},{n:"アリストテレス",a:"体は魂の器だ。魂の徳を実現するための体を売ることは、よき生に反する"},{n:"サルトル",a:"売る選択も売らない選択も、それぞれが自己の本質を作る。判断は個人に委ねられる"},{n:"プラトン",a:"体は魂の仮の宿に過ぎないが、それを売ることは魂の純粋さを損なう"},{n:"スピノザ",a:"自己保存の欲求は最も根本的な自然の法だ。追い詰められた人が売ることは自然の必然ともいえる"}],
   cannibal:[{n:"ベンサム",a:"殺す。3人の幸福の総量が1人を上回る以上、功利主義的には明確だ"},{n:"カント",a:"殺さない。人を手段として扱うことは絶対に許されない。たとえ全員が死んでも"},{n:"ミル",a:"3人の幸福が1人を上回るなら正当化できる。ただし「誰を選ぶか」の基準は別の問題だ"},{n:"サルトル",a:"どちらを選んでも、その選択があなたの本質を決める。逃げることも一つの選択だ"},{n:"レヴィナス",a:"殺さない。目の前の1人の顔が先にある。他者の顔から逃れることはできない"},{n:"アリストテレス",a:"極限の緊急避難として許されうる。しかし法の下で裁かれることも正義の一部だ"},{n:"ルソー",a:"自然状態では生存が最優先だ。ただし社会に戻れば、その行為は法の下に置かれる"},{n:"スピノザ",a:"自己保存の欲求は最も根本的。生き延びるための行為は自然の必然として理解できる"},{n:"ハイデガー",a:"死への存在として生を選ぶことは理解できる。だがその選択の重さから逃げてはならない"}],
-  teleport:[{n:"カント",a:"記憶や体より深い「認識する主体」が自己の根拠だ。その主体が続くなら、あなたはあなただ"},{n:"サルトル",a:"あなたとは選び続ける存在だ。テレポーテーション後も選ぶ主体が続くなら、同じあなただ"},{n:"プラトン",a:"魂こそが本当のあなただ。体はどうなっても、魂が同じなら同じ人間だ"},{n:"アリストテレス",a:"魂と体は切り離せない。体が破壊された時点で、あなたはすでに死んでいる"},{n:"ハイデガー",a:"あなたとは死に向かって生きる存在だ。体が消えた瞬間、その存在は終わる。再現されたのは別の誰かだ"},{n:"ミル",a:"記憶がつながっているなら同じ人だ。昨日の自分を「自分」と思えるのと同じ理由で"},{n:"レヴィナス",a:"あなたが「あなた」なのは、他者があなたを「あなた」と呼ぶからだ。同一性は関係の中にある"}]
+  teleport:[{n:"カント",a:"記憶や体より深い「認識する主体」が自己の根拠だ。その主体が続くなら、あなたはあなただ"},{n:"サルトル",a:"あなたとは選び続ける存在だ。テレポーテーション後も選ぶ主体が続くなら、同じあなただ"},{n:"プラトン",a:"魂こそが本当のあなただ。体はどうなっても、魂が同じなら同じ人間だ"},{n:"アリストテレス",a:"魂と体は切り離せない。体が破壊された時点で、あなたはすでに死んでいる"},{n:"ハイデガー",a:"あなたとは死に向かって生きる存在だ。体が消えた瞬間、その存在は終わる。再現されたのは別の誰かだ"},{n:"ミル",a:"記憶がつながっているなら同じ人だ。昨日の自分を「自分」と思えるのと同じ理由で"},{n:"レヴィナス",a:"あなたが「あなた」なのは、他者があなたを「あなた」と呼ぶからだ。同一性は関係の中にある"}],
+  war:[{n:"ベンサム",a:"介入すべきだ。虐殺で失われる命の総量を最小化することが功利主義の答えだ"},{n:"カント",a:"介入する義務がある。ただし手段は正当でなければならない。人道を口実にした征服は許されない"},{n:"サルトル",a:"介入するもしないも、どちらも選択だ。不介入で生じた死も、あなたの選択の結果だ"},{n:"ミル",a:"介入は認められうる。ただし「自由な社会を守るため」という明確な原則がある場合に限る"},{n:"アリストテレス",a:"正しい目的・正しい手段・正当な権威の三つが揃えば、戦争は徳ある行為でありうる"},{n:"ハイデガー",a:"介入の「正しさ」を問う前に、誰がその正しさを決めるかを問え。支配者の言語が正義を作る"},{n:"ルソー",a:"他国の主権への介入は一般意志を侵害する。しかし人類の共通意志が虐殺を拒絶する"},{n:"レヴィナス",a:"顔を持つ他者が殺されている。その顔への応答が、全ての倫理の出発点だ。介入は義務だ"}]
 };
 
 const NODES={
@@ -1184,7 +1221,23 @@ const NODES={
   teleport_end_gradient:{isEnd:true,title:"同一性はグラデーション",body:"パーフィットは「同一か否かは0か1ではなく、程度の問題だ」と言った。テセウスの船に「同じか違うか」の明確な答えがないように、自己同一性も連続するグラデーションかもしれない。",concept:"同一性のグラデーション（パーフィット）",quote:"「同一性は重要ではないかもしれない。重要なのは連続性の程度だ」——パーフィット"},
   teleport_end_continuity:{isEnd:true,title:"連続性が同一性を作る",body:"素材や意識の有無ではなく、「連続して存在してきた」という事実が同一性を作る——これが物理的連続性の立場だ。でも「連続」とは何かを問い始めると、また別の問いが始まる。",concept:"物理的連続性・同一性の問い",quote:"「川は同じ水が流れているのではない。それでも川は川だ」"},
   teleport_end_memory:{isEnd:true,title:"記憶の連続性",body:"ロックは「記憶が自己同一性を作る」と言った。同じ過去の経験を「自分のもの」として覚えていることが、あなたをあなたにする。記憶が失われれば、それは別の人物の始まりかもしれない。",concept:"記憶による同一性（ロック）",quote:"「意識が過去の行為に届く限り、その人の同一性は続く」——ロック"},
-  teleport_end_consciousness:{isEnd:true,title:"意識こそが自己",body:"デカルトは「我思う、ゆえに我あり」と言った。意識こそが自己の根拠だとすれば、意識が途切れた間「あなた」はいなかったことになる。でも毎朝目覚めるあなたは、昨夜の「あなた」の続きか、それとも新しい誰かか。",concept:"意識と自己（デカルト）",quote:"「我思う、ゆえに我あり」——考えている今この瞬間だけが、確実な存在の証明だ。"}
+  teleport_end_consciousness:{isEnd:true,title:"意識こそが自己",body:"デカルトは「我思う、ゆえに我あり」と言った。意識こそが自己の根拠だとすれば、意識が途切れた間「あなた」はいなかったことになる。でも毎朝目覚めるあなたは、昨夜の「あなた」の続きか、それとも新しい誰かか。",concept:"意識と自己（デカルト）",quote:"「我思う、ゆえに我あり」——考えている今この瞬間だけが、確実な存在の証明だ。"},
+
+  // ── 正戦論 ──
+  war_q1:{q:"隣国の政府が自国民を組織的に虐殺している。あなたの国はその事実を知っている。軍事介入すべきか？",premise:"相手国はあなたの国を攻撃していない。外交交渉は失敗した。介入以外に手段はない。",choices:[{l:"A",t:"介入すべきだ",guide:"他国の市民を守るために軍を動かす",next:"war_q2a"},{l:"B",t:"介入すべきでない",guide:"攻撃されていない以上、他国の内政だ",next:"war_q2b"}]},
+  war_q2a:{q:"介入のために兵士を派遣した。戦闘でその兵士たちが死んだ。この死は正当化されるか？",premise:"救われた外国市民は数千人。死んだのは自国の若者たちだ。",choices:[{l:"A",t:"正当化される——人道のための死だ",guide:"命を守るための命の犠牲は意味がある",next:"war_q3a"},{l:"B",t:"正当化されない——他国民のために自国民を死なせられない",guide:"国家の義務は自国民を守ることだ",next:"war_q3b"}]},
+  war_q2b:{q:"介入しなかった。虐殺は続き、50万人が死んだ。「止める力があったのに動かなかった」と批判される。どう答えるか？",premise:"力はあった。でも自国民の命を危険にさらす根拠はなかった。",choices:[{l:"A",t:"自国の判断として正当だ。攻撃されていない以上、介入の義務はない",guide:"主権と自国民優先の論理",next:"war_end_sovereignty"},{l:"B",t:"止める力があったなら、責任があった",guide:"不作為も一つの選択だ",next:"war_q3c"}]},
+  war_q3a:{q:"介入は成功し、虐殺は止まった。だが——介入後、あなたの国は「安全確保」の名目でその地域の資源を管理下に置いた。この介入は最初から正しかったか？",premise:"人道的動機と経済的利益が混在していた可能性がある。",choices:[{l:"A",t:"結果として命が救われたなら正しい",guide:"動機より結果が問われる",next:"war_q4a"},{l:"B",t:"動機が不純なら正戦とは言えない",guide:"手段と動機の純粋性が問われる",next:"war_end_pacifism"}]},
+  war_q3b:{q:"兵士の死を正当化できないなら——虐殺を知りながら動かないことを、あなたはどう名付けるか？",premise:"動かないことも、一つの決断だ。",choices:[{l:"A",t:"「自国の安全を守った」と名付ける",guide:"国家の第一義的責任は自国民",next:"war_end_sovereignty"},{l:"B",t:"「命を見捨てた」と名付ける",guide:"力があっても使わなかった",next:"war_q4b"}]},
+  war_q3c:{q:"介入すべきだったなら——力を持つ国だけが介入を選べる現状は、正義と言えるか？",premise:"力があるから介入できる。力がなければ「すべきだ」と言っても動けない。",choices:[{l:"A",t:"力のある国が行動するのは理にかなっている",guide:"現実主義——力が正義の執行者だ",next:"war_end_realism"},{l:"B",t:"力のある国が正義を決めるのは覇権主義だ",guide:"誰が正義を定義するかが問題だ",next:"war_q4b"}]},
+  war_q4a:{q:"「結果が良ければ正しい」なら——悪い動機で始まった戦争でも、たまたま圧政者を倒せば正しいことになるか？",premise:"動機・手段・結果——正戦を規定するのはどれか。",choices:[{l:"A",t:"結果が全てだ",guide:"意図より帰結が問われる",next:"war_end_consequentialist"},{l:"B",t:"動機と手段も問われるべきだ",guide:"正しい戦争には複数の要件がある",next:"war_end_just_war"}]},
+  war_q4b:{q:"正当な介入基準を誰が定め、誰が執行するのか？",premise:"強国が基準を決めれば覇権主義。弱国は実行力がない。国連安保理は大国の拒否権に縛られている。",choices:[{l:"A",t:"不完全でも既存の国際機関を使うしかない",guide:"現実主義——完璧な制度を待つ余裕はない",next:"war_end_realism"},{l:"B",t:"答えは出ない。でも問い続けることが大切だ",guide:"問いを持ち続けることが倫理の責任",next:"war_end_question"}]},
+  war_end_sovereignty:{isEnd:true,title:"主権の論理",body:"「他国の内政に干渉しない」という主権の原則は、国際秩序の根幹だ。でもその原則は、政府が自国民を虐殺するときにも適用されるのか。主権は誰のためにあるのか——国家のためか、その国に生きる人々のためか。",concept:"主権論・人道的介入の法的根拠",quote:"「主権とは、国民を守る責任を伴う権力だ。守らない政府に主権はあるか」——保護する責任（R2P）概念より"},
+  war_end_pacifism:{isEnd:true,title:"正戦否定論——正しい戦争などない",body:"動機が不純な戦争は正戦ではない。では純粋な動機による戦争は歴史上あったか。多くの思想家は「戦争には常に複数の動機が絡む」と言う。アウグスティヌスが正戦論を提唱した古代から、現代まで議論は終わらない。",concept:"正戦論の批判・平和主義",quote:"「聖戦、正戦——どちらも言葉が戦争を正当化する道具になってきた」"},
+  war_end_consequentialist:{isEnd:true,title:"帰結主義的正戦論",body:"結果が良ければ手段も許される——帰結主義はそう言う。でも「良い結果」は誰が判断するか。介入した側が「成功した」と評価するとき、犠牲になった人々の声はどこへいくのか。",concept:"帰結主義・功利主義的戦争観",quote:"「結果が全てなら、勝者が常に正しいことになる」——歴史はそれを繰り返してきた。"},
+  war_end_just_war:{isEnd:true,title:"正戦論の要件",body:"アクィナスが整理した正戦の要件は三つだ——正当な権威による宣戦、正しい動機、正当な手段。現代の正戦論はさらに「最後の手段であること」「成功の見込みがあること」などを加える。この要件を全て満たす戦争が、歴史上あったかどうかは別の問いだ。",concept:"正戦論（アクィナス・グロティウス）",quote:"「正しい目的のためでも、不正な手段を使えば、その戦争は正戦ではない」——アクィナス"},
+  war_end_realism:{isEnd:true,title:"現実主義——力が正義を執行する",body:"理想的な国際機関があれば良い。でも現実には、力のある国が動かなければ虐殺は止まらない。現実主義は言う——「不完全な介入でも、介入しないよりまし」。だが「まし」を決めるのは誰か、という問いは残る。",concept:"国際政治の現実主義・正戦論の限界",quote:"「強者が正義を語るとき、弱者は聞かされる。これが歴史の現実だ」——トゥキュディデス"},
+  war_end_question:{isEnd:true,title:"問いを持ち続けること",body:"正戦の基準を完璧に定めることはできない。でもその問いを手放すことは、「戦争は何でもあり」を認めることだ。答えが出なくても、「この戦争は正しいか」と問い続けることが、倫理の仕事かもしれない。",concept:"正戦論の役割・規範としての哲学",quote:"「答えが出ない問いでも、問い続けることに意味がある」——それが正戦論が何千年も論じられてきた理由だ。"}
 };
 
 let deepTheme=null,deepCur=null,deepHistory=[],deepSelIdx=null;
@@ -1269,6 +1322,185 @@ function showDeepResult(endKey){
       <button class="btn-secondary" onclick="showScreen('s-mode')">最初に戻る</button>
     </div>`;
   showScreen('s-deep-result');
+}
+
+// ── PHILOSOPHER JOURNEY ──
+const PHIL_JOURNEYS = {
+  nietzsche: {
+    name: "ニーチェ",
+    subtitle: "道徳の彼岸へ",
+    intro: "「神は死んだ」——この言葉が意味するのは、神学的な問いではない。価値の根拠が崩壊したという、近代最大の宣告だ。ニーチェとともに、道徳の起源を問いなおす。",
+    scenes: [
+      {
+        concept: "道徳の起源",
+        text: "「善い」と「悪い」——この概念はどこから来たのか。ニーチェは言う。最初に「善い」を定義したのは、強者自身だ。貴族や戦士が「自分たちは善い」と言い、その対比として「弱い者たちは悪い」と名付けた。道徳とは、最初から価値判断の道具だった。",
+        q: "あなたが「良いことだ」と思っていることは、どこから来ていると思うか？",
+        choices: [
+          {t:"自分の内側から。直感や信念として", guide:"ニーチェはこれを「強者の道徳」に近いと言う", comment:"自分の内側から判断できるなら、それは一つの強さだ。しかしニーチェは問う——「その内側」はどこで形成されたか。社会、家族、文化が「内側」を作ったとしたら？"},
+          {t:"社会や文化から。周りが正しいとすることを学んだ", guide:"ニーチェはこれを「弱者の道徳」に近いと言う", comment:"正直な答えかもしれない。ニーチェもそう言う——私たちの多くは、既存の価値を「学んで」いる。問いは、その価値が誰のために作られたかだ。"}
+        ]
+      },
+      {
+        concept: "主人道徳と奴隷道徳",
+        text: "ニーチェは道徳を二つに分けた。「主人道徳」——強者が自分を起点に「これが善い」と価値を創造する。「奴隷道徳」——弱者が強者への憎しみを起点に「あれが悪い」と反応から始める。キリスト教の「謙虚さ」「服従」「憐れみ」は、弱者が強者に仕返しするために作った道徳だとニーチェは言った。",
+        q: "「謙虚であれ」「他者を優先せよ」という教えを、あなたはどう受け取るか？",
+        choices: [
+          {t:"本当の美徳だと思う。自己中心性への抵抗だ", guide:"奴隷道徳を価値として受け入れている", comment:"ニーチェはこの感覚自体を問う。「謙虚さ」は本当に美徳か、それとも「強くあること」への否定から生まれた価値か。あなたはどちらだと思うか。"},
+          {t:"何かを抑圧されている気がする。自分を消せと言われているようだ", guide:"主人道徳的な反応", comment:"ニーチェが言いたかったのはこれだ。「謙虚さ」という価値がいつも正しいとは限らない。価値そのものを問いなおす権利が、あなたにはある。"}
+        ]
+      },
+      {
+        concept: "ルサンチマン",
+        text: "ニーチェが「ルサンチマン（怨恨）」と呼んだのは、弱者が強者に向ける憎しみが道徳に転化する現象だ。「強くて自由な者は悪だ」「苦しんでいる者は善だ」——この転換は、力への意志を持てない者が強者を貶めることで自分の価値を守ろうとする心理だ。現代のSNSの「強者叩き」にも、ニーチェはこれを見るだろう。",
+        q: "誰かへの批判や怒りが、自分の中の何かから来ていると感じたことはあるか？",
+        choices: [
+          {t:"ある。相手への批判が、自分の不満や嫉妬と混ざっていた", guide:"ルサンチマンの自覚", comment:"その気づき自体が、ニーチェの言う誠実さだ。怒りや批判が「純粋な正義感」なのか「隠れた嫉妬や怨恨」なのか——常に問い続けることが、ルサンチマンを超える第一歩だ。"},
+          {t:"ない。自分の批判は正当な理由に基づいている", guide:"批判の純粋性への信頼", comment:"ニーチェなら問い返す。「正当な理由」とは誰が決めたか？正義感の裏に怨恨が隠れていないか？問うことを止めた瞬間、道徳は思考停止になる。"}
+        ]
+      },
+      {
+        concept: "神は死んだ",
+        text: "「神は死んだ。そして我々が神を殺したのだ」——これはニーチェの最も有名な言葉だ。神学的な宣言ではなく、「絶対的な価値の根拠」が崩壊したという近代への診断だ。科学、合理主義、啓蒙主義が「神」を不要にした。問題は、神を失った後に何が残るか——価値の根拠がなくなった世界で、人間は何を根拠に生きるのか。",
+        q: "「絶対的に正しいこと」があると思うか？",
+        choices: [
+          {t:"ある。たとえば人を殺すことは絶対に悪だ", guide:"絶対的価値の存在を認める", comment:"ニーチェはこの確信の根拠を問う。「絶対に」と言えるのは、どこかに絶対的な根拠があるからではないか。その根拠は、神なき後も成立するか。あなたの確信は何に基づいているか。"},
+          {t:"ない。すべての価値は相対的だ", guide:"価値相対主義", comment:"ニーチェが警告するのはここだ。「何も絶対ではない」と気づいた後、人は価値の喪失——ニヒリズムに陥る危険がある。では、何もかも相対的だとして、あなたは何のために生きるのか。"}
+        ]
+      },
+      {
+        concept: "ニヒリズム",
+        text: "神が死に、絶対的な価値が失われた後に訪れるのがニヒリズム（虚無主義）だ。「何も意味がない」「努力も、愛も、正義も、最終的には無意味だ」——この感覚だ。ニーチェはニヒリズムを診断として語った。問題は、ニヒリズムを「仕方ない」と受け入れるか、それとも超えようとするかだ。",
+        q: "「どうせ何も意味がない」と感じたとき、あなたはどうするか？",
+        choices: [
+          {t:"それでも続ける。意味が見えなくても動き続ける", guide:"能動的ニヒリズムへの接近", comment:"ニーチェが目指したのはこれだ。意味の喪失を直視しながら、それでも生の肯定に向かうこと。「意味がないから無力」ではなく、「意味がなくても動く」ところに、次の価値が生まれる。"},
+          {t:"立ち止まる。意味を感じられないなら動けない", guide:"受動的ニヒリズム", comment:"正直な感覚だ。ニーチェもニヒリズムの重さは認めた。問いは——その立ち止まりの後、あなたは何に向かうか。虚無を超えるための「自分自身の価値」を、作り出せるか。"}
+        ]
+      },
+      {
+        concept: "超人と永劫回帰",
+        text: "ニヒリズムの先にニーチェが提示したのが「超人（ウーバーメンシュ）」だ。神なき世界で、自分自身が価値を創造する人間。「この人生が永遠に繰り返されるとしても、それでいい」と言える生き方——これが「永劫回帰」の思想実験だ。後悔のない選択をしているかを問う、究極の試金石として。",
+        q: "今のあなたの生き方が、永遠に繰り返されるとしたら——どう感じるか？",
+        choices: [
+          {t:"それでいい、と思える部分がある", guide:"生の肯定", comment:"それがニーチェの言う「超人」への一歩だ。価値を外から借りるのではなく、「これでいい」と言える自分の選択がある。その選択を積み重ねることが、ニーチェの言う価値の創造だ。"},
+          {t:"繰り返したくない。変えたいことがある", guide:"自己変革の契機", comment:"ニーチェはこれも肯定する。「変えたい」と思えるなら、あなたはすでに自分の価値基準を持っている。問いは——では何を変え、何を自分の価値として選ぶか。永劫回帰は問いかけだ、答えではない。"}
+        ]
+      }
+    ],
+    summary: {
+      title: "ニーチェが問うたこと",
+      concepts: [
+        {name:"道徳の起源", desc:"善悪は永遠の真実ではなく、歴史的・社会的に形成された価値判断だ"},
+        {name:"主人道徳 / 奴隷道徳", desc:"価値は強者の自己肯定から生まれる。弱者の怨恨から生まれた道徳は、力への意志を否定する"},
+        {name:"ルサンチマン", desc:"怨恨が道徳に転化する現象。批判や正義感の裏に潜む感情を問いなおすこと"},
+        {name:"神は死んだ", desc:"絶対的価値の根拠が崩壊した近代。何を根拠に生きるかが問われる"},
+        {name:"ニヒリズム", desc:"価値喪失への応答。受動的に飲み込まれるか、能動的に超えるか"},
+        {name:"超人 / 永劫回帰", desc:"自らが価値を創造する人間像。永遠に繰り返せる選択をしているかという試金石"}
+      ],
+      quote: "「神は死んだ。神は死んだままだ。そして我々が神を殺したのだ」——ニーチェ『悦ばしき知識』",
+      closing: "ニーチェは答えを与えない。ただ問いを突きつける。あなたの道徳はどこから来ているか。あなたは自分の価値を自分で決めているか。"
+    }
+  }
+};
+
+let philKey=null, philScene=0, philAnswers=[], philSelIdx=null;
+
+function startPhil(key){
+  philKey=key; philScene=0; philAnswers=[]; philSelIdx=null;
+  showScreen('s-phil-journey');
+  renderPhilScene();
+}
+
+function renderPhilScene(){
+  philSelIdx=null;
+  const journey=PHIL_JOURNEYS[philKey];
+  const scenes=journey.scenes;
+  const scene=scenes[philScene];
+  const total=scenes.length;
+  document.getElementById('phil-pfill').style.width=(philScene/total*100)+'%';
+  document.getElementById('phil-nbtn').disabled=true;
+  document.getElementById('phil-nbtn').textContent=(philScene===total-1)?'まとめを見る ✦':'次へ →';
+  const isLast=philScene===total-1;
+  document.getElementById('phil-nbtn').textContent=isLast?'まとめを見る ✦':'次へ →';
+  const choices=scene.choices.map((c,i)=>`
+    <button class="choice-btn" id="pc${i}" onclick="selectPhil(${i})">
+      <span class="choice-mark" id="pm${i}"></span>
+      <span class="choice-label">${['A','B'][i]}</span>
+      <div><div class="choice-text">${c.t}</div><div class="choice-guide">${c.guide}</div></div>
+    </button>`).join('');
+  document.getElementById('phil-area').innerHTML=`
+    <div class="card">
+      <div class="q-intro" style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:0.75rem;">${journey.name} — ${scene.concept}</div>
+      <div class="q-text" style="font-size:15px;color:var(--text-2);font-weight:400;line-height:1.8;margin-bottom:1.25rem;">${scene.text}</div>
+      <div style="border-top:1px solid var(--border);padding-top:1.25rem;">
+        <div class="q-text">${scene.q}</div>
+        <div class="choices">${choices}</div>
+      </div>
+    </div>`;
+}
+
+function selectPhil(i){
+  philSelIdx=i;
+  document.querySelectorAll('#phil-area .choice-btn').forEach((b,j)=>{b.classList.remove('sel');const m=document.getElementById('pm'+j);if(m)m.textContent='';});
+  document.getElementById('pc'+i).classList.add('sel');
+  document.getElementById('pm'+i).textContent='✓';
+  document.getElementById('phil-nbtn').disabled=false;
+  // Show Nietzsche's comment inline
+  const scene=PHIL_JOURNEYS[philKey].scenes[philScene];
+  const comment=scene.choices[i].comment;
+  const existing=document.getElementById('phil-comment');
+  if(!existing){
+    const commentDiv=document.createElement('div');
+    commentDiv.id='phil-comment';
+    commentDiv.style.cssText='margin-top:1rem;padding:1rem;background:var(--accent-light);border-left:2px solid var(--accent);border-radius:var(--radius);font-size:14px;color:var(--text-2);line-height:1.75;';
+    commentDiv.innerHTML=`<span style="font-size:11px;letter-spacing:0.08em;color:var(--accent);display:block;margin-bottom:0.4rem;">ニーチェなら——</span>${comment}`;
+    document.getElementById('phil-area').querySelector('.card').appendChild(commentDiv);
+  } else {
+    existing.innerHTML=`<span style="font-size:11px;letter-spacing:0.08em;color:var(--accent);display:block;margin-bottom:0.4rem;">ニーチェなら——</span>${comment}`;
+  }
+}
+
+document.getElementById('phil-nbtn').addEventListener('click',()=>{
+  if(philSelIdx===null) return;
+  const scene=PHIL_JOURNEYS[philKey].scenes[philScene];
+  philAnswers.push({concept:scene.concept, q:scene.q, chosen:scene.choices[philSelIdx].t});
+  philScene++;
+  philSelIdx=null;
+  if(philScene>=PHIL_JOURNEYS[philKey].scenes.length){ showPhilResult(); }
+  else{ renderPhilScene(); }
+});
+
+function showPhilResult(){
+  const journey=PHIL_JOURNEYS[philKey];
+  const sum=journey.summary;
+  document.getElementById('phil-pfill').style.width='100%';
+  const conceptsHTML=sum.concepts.map(c=>`
+    <div style="margin-bottom:0.75rem;">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:0.2rem;">${c.name}</div>
+      <div style="font-size:14px;color:var(--text-2);">${c.desc}</div>
+    </div>`).join('');
+  const pathHTML=philAnswers.map((a,i)=>`
+    <div class="path-item">
+      <span class="path-q">Q${i+1}</span>
+      <div style="flex:1;"><div class="path-sub">${a.concept}</div><div class="path-ans">${a.chosen}</div></div>
+    </div>`).join('');
+  document.getElementById('s-phil-result').innerHTML=`
+    <button class="btn-back" onclick="showScreen('s-mode')">← トップに戻る</button>
+    <div class="result-hero">
+      <div class="result-badge">${journey.name}</div>
+      <div class="result-axis">${sum.title}</div>
+    </div>
+    <div class="stack-md">
+      <div class="rsec"><div class="rsec-tag">思想のまとめ</div><div class="rsec-body">${conceptsHTML}</div></div>
+      <div class="rsec"><div class="rsec-tag">あなたが選んだ答え</div>${pathHTML}</div>
+      <div class="journey-card">
+        <div class="journey-title">${sum.title}</div>
+        <div class="journey-body">${sum.closing}</div>
+        <div class="journey-quote">${sum.quote}</div>
+      </div>
+      <button class="btn-secondary" onclick="showScreen('s-phil-select')">別の哲学者を見る</button>
+      <button class="btn-secondary" onclick="showScreen('s-mode')">最初に戻る</button>
+    </div>`;
+  showScreen('s-phil-result');
 }
 </script>
 </body>
